@@ -1,0 +1,64 @@
+input, textarea, select {font-size: 12px;}
+
+#contactform h4 {margin-bottom: 20px;}
+
+#contact h1 { margin: 10px 0 10px; font-size: 24px; }
+#contact hr { color: inherit; height: 0; margin: 6px 0 6px 0; padding: 0; border-style: none none solid; }
+
+#contact { display: block; margin: 10px auto;}
+
+/* Form style */
+
+#contact label { display: block; height: 16px; line-height: 16px; width: 105px; font-size: 12px; font-weight: normal;}
+#contact label.verify {float: left; width: 60px; height: 50px; line-height: 50px;}
+#contact input, #contact textarea, #contact select, #contact input.submit {
+	border: none;
+	margin: 10px 0 0;
+	-webkit-border-radius: 2px;
+	-moz-border-radius: 2px;
+	border-radius: 2px;
+	-webkit-box-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
+	-moz-box-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
+	box-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
+}
+
+#contact input, #contact textarea {
+	padding: 10px;
+	width: 400px;
+}
+
+#contact select {
+	padding: 10px;
+	width: 420px;
+}
+
+#contact input:focus, #contact textarea:focus, #contact select:focus, #contact input.submit:hover {
+	border: none;
+	-webkit-box-shadow: 0px 0px 3px 0px rgba(150, 150, 150, 0.3);
+	-moz-box-shadow: 0px 0px 3px 0px rgba(150, 150, 150, 0.3);
+	box-shadow: 0px 0px 3px 0px rgba(150, 150, 150, 0.3);
+}
+
+#contact input.submit {
+	width: 85px;
+	cursor: pointer;
+	font-size: 12px;
+}
+
+#contact input[type="submit"][disabled] { background:#888; }
+/* #contact fieldset { padding:20px; border:1px solid #eee;}
+#contact legend { padding:7px 10px; font-weight:bold; color:#000; border:1px solid #eee; margin-bottom:0 !important; margin-bottom:20px; } */
+
+#contact span.required{ font-size: 13px; color: #ff0000; } /* Select the colour of the * if the field is required. */
+
+#message { margin: 10px 0; padding: 0; }
+
+.error_message { display: block; height: 22px; line-height: 22px; background: #FBE3E4 url('../images/form-error.gif') no-repeat 10px center; padding: 3px 10px 3px 35px; color:#8a1f11;border: 1px solid #FBC2C4;}
+
+#contact #success_page h1 { background: url('../images/form-success.gif') left no-repeat; padding-left:22px; }
+
+acronym { border-bottom:1px dotted #ccc; }
+
+option {background: #fafafa;}
+
+.container img.contact-photo {padding: 0;}

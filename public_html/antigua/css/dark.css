@@ -1,0 +1,323 @@
+/* ---------------------------- */
+/*        Light Style CSS
+/* ---------------------------- */
+
+body {
+	color: #FFF;
+}
+.preloader {background: #444 url(../images/dark/preload.gif) center center no-repeat; }
+.content img {background: #fafafa;}
+.divider {background: url(../images/dark/divider-bg.png) repeat-x center left;}
+.info-social li {border-left: 1px dotted #666;}
+.info-social li.last-child {border-right: 1px dotted #666;}
+.info-social a {background: url(../images/dark/social-icons.png) no-repeat;}
+.info-top, .section-header, .dotted-header span, .content-inner, #footer-wrapper, .lp-description, .project-description, .blog-masonry-description,
+.feature-box .content-inner, .feature-box h5 span, .feature-box img {background: #444;}
+h1,h2,h3,h4,h5,h6 {color: #fff;}
+hr {border:solid #666;}
+a, a:visited { color: #aaa; }
+a:hover, a:focus { color: #fff; }
+.subheader {color: #ddd;}
+.section-header {color: #fafafa;}
+.header-triangle-down {background:url(../images/dark/triangle-down.png) no-repeat;}
+.dotted-header, .feature-box h5 {background: #444 url(../images/dark/headers-bg.png) repeat-x center left;}
+.dotted-header span {color: #fff;}
+blockquote, blockquote p {color: #ddd;}
+blockquote {background: url(../images/dark/quote.png) no-repeat 10px 15px;}
+.post-top-wrap blockquote {background: none; padding-left: 0;}
+blockquote cite {color:#aaa;}
+blockquote cite a,blockquote cite a:visited,blockquote cite a:visited {color:#ddd;}
+.dropcap2, .dropcap3 {color: #444; background: #fafafa;}
+ul.arrow li, .sidebar li, #footer li {background: url(../images/dark/li-arrow.png) no-repeat 0 center;}
+cite.fn, cite.fn a {color: #ddd;}
+cite.fn a:hover {color: #ccc;}
+.page-title {background: #000; opacity:0.6; filter: alpha(opacity=60); -ms-filter:"progid:DXImageTransform.Microsoft.Alpha(Opacity=60)"; border-bottom: 1px solid #222;}
+.page-title h1 {color: #fff;}
+.content a:hover {color: #fff;}
+.accordion h3, .toggle h3 {background: #333;}
+.accordion h3 a, .toggle h3 a {color: #aaa;}
+.accordion h3 a:hover, .toggle h3 a:hover {color: #fff;}
+.accordion h3.ui-state-active a:hover, .toggle h3.active a:hover {color: #fff;}
+.accordion h3.ui-state-active, .toggle h3.active {background: #555;}
+.accordion div, .toggle div {border-color: #333;}
+.content-slider .cs-slidecontrols li a:hover {color: #fff;}
+.container ul.tabs {border-bottom: solid 1px #333;}
+.container ul.tabs li a {border: solid 1px #222; border-width: 1px 1px 0 0; background: #555; color: #aaa;}
+.container ul.tabs li a.active {background: #444; color: #fafafa;}
+.feature-box .feature-box-image.sett {background: url(../images/dark/featuredbox-settings.png) no-repeat center center;}
+.feature-box .feature-box-image.resp {background: url(../images/dark/featuredbox-responsive.png) no-repeat center center;}
+.feature-box .feature-box-image.maf {background: url(../images/dark/featuredbox-ok.png) no-repeat center center;}
+.feature-box:hover .feature-box-image.sett {background: url(../images/light/featuredbox-settings.png) no-repeat center center;}
+.feature-box:hover .feature-box-image.resp {background: url(../images/light/featuredbox-responsive.png) no-repeat center center;}
+.feature-box:hover .feature-box-image.maf {background: url(../images/light/featuredbox-ok.png) no-repeat center center;}
+#footer-bottom p, #footer-bottom a {
+	color: #CCC;
+}
+.container a.button,
+button,
+input[type="submit"],
+input[type="reset"],
+input[type="button"],
+#commentlist a.comment-reply-link, #commentform input[type="submit"] {
+	background: #ECEEF7; /* Old browsers */
+	background: #ECEEF7 -moz-linear-gradient(top, rgba(255,255,255,.1) 0%, rgba(0,0,0,.1) 100%);
+	background: #ECEEF7 -webkit-gradient(linear, left top, left bottom, color-stop(0%,rgba(255,255,255,.1)), color-stop(100%,rgba(0,0,0,.1)));
+	background: #ECEEF7 -webkit-linear-gradient(top, rgba(255,255,255,.1) 0%,rgba(0,0,0,.1) 100%);
+	background: #ECEEF7 -o-linear-gradient(top, rgba(255,255,255,.1) 0%,rgba(0,0,0,.1) 100%);
+	background: #ECEEF7 -ms-linear-gradient(top, rgba(255,255,255,.1) 0%,rgba(0,0,0,.1) 100%);
+	background: #ECEEF7 linear-gradient(top, rgba(255,255,255,.1) 0%,rgba(0,0,0,.1) 100%);
+	border: 1px solid #8F919C;
+	color: #444;
+}
+.container a.button:hover,
+button:hover,
+input[type="submit"]:hover,
+input[type="reset"]:hover,
+input[type="button"]:hover,
+#commentlist a.comment-reply-link:hover, #commentform input[type="submit"]:hover {
+	color: #222;
+	background: #DBDEEA; /* Old browsers */
+	background: #DBDEEA -moz-linear-gradient(top, rgba(0,0,0,.1) 0%, rgba(255,255,255,.1) 100%);
+	background: #DBDEEA -webkit-gradient(linear, left top, left bottom, color-stop(0%,rgba(0,0,0,.1)), color-stop(100%,rgba(255,255,255,.1)));
+	background: #DBDEEA -webkit-linear-gradient(top, rgba(0,0,0,.1) 0%,rgba(255,255,255,.1) 100%);
+	background: #DBDEEA -o-linear-gradient(top, rgba(0,0,0,.1) 0%,rgba(255,255,255,.1) 100%);
+	background: #DBDEEA -ms-linear-gradient(top, rgba(0,0,0,.1) 0%,rgba(255,255,255,.1) 100%);
+	background: #DBDEEA linear-gradient(top, rgba(0,0,0,.1) 0%,rgba(255,255,255,.1) 100%);
+	border: 1px solid #aaa;
+}
+
+/* ---------------------------- */
+/*          Navigation
+/* ---------------------------- */
+
+#nav {border:1px solid #222;}
+#nav li a {color:#bbb;}
+#nav li a:hover {color:#fff;}
+#nav li {
+	border-left:1px solid #333;
+	background: #555;	
+	background-image: -webkit-gradient(linear, left top, left bottom, from(#555), to(#444));
+	background: -webkit-linear-gradient(top, #555, #444);
+	background: -moz-linear-gradient(top, #555, #444);
+	background: -o-linear-gradient(top, #555, #444);
+	background: -ms-linear-gradient(top, #555, #444);
+	background: linear-gradient(top, #555, #444);
+}
+#nav > li.first-child {border-left: none;}
+#nav > li:hover, #nav > li.parent:hover {
+	background: #444;	
+	background-image: -webkit-gradient(linear, left top, left bottom, from(#444), to(#555));
+	background: -webkit-linear-gradient(top, #444, #555);
+	background: -moz-linear-gradient(top, #444, #555);
+	background: -o-linear-gradient(top, #444, #555);
+	background: -ms-linear-gradient(top, #444, #555);
+	background: linear-gradient(top, #444, #555);
+}
+#nav ul a {background:#555;	color:#bbb;	border-bottom:1px solid #555;}
+#nav ul a:hover {color:#fff;}
+#nav > li.home-page {padding-left: 6px;}
+#nav > li.home-page > a {text-indent: -9999px; background: url(../images/dark/home-page.png) no-repeat 0 0;}
+#nav > li.home-page:hover > a {background: url(../images/dark/home-page.png) no-repeat 0 -40px;}
+
+/* ---------------------------- */
+/*         Blog colors
+/* ---------------------------- */
+
+.hentry h2 a {color: #fff;}
+.hentry .meta a {color: #bbb;}
+.meta-author {background: url(../images/dark/meta.png) no-repeat 0 0;}
+.meta-date {background: url(../images/dark/meta.png) no-repeat 0 -20px;}
+.meta-comments {background: url(../images/dark/meta.png) no-repeat 0 -40px;}
+.meta-category {background: url(../images/dark/meta.png) no-repeat 0 -60px;}
+.comment-meta a {color: #ccc;}
+.comment-meta a:hover {color: #fff;}
+.meta {background: #3e3e3e; border-top: 1px solid #393939; border-bottom: 2px solid #333;}
+div.comment-body {
+	background: #333;
+	background: -moz-linear-gradient(top, #333 0%, #222 100%);
+	background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#333), color-stop(100%,#222));
+	background: -webkit-linear-gradient(top, #333 0%,#222 100%);
+	background: -o-linear-gradient(top, #333 0%,#222 100%);
+	background: -ms-linear-gradient(top, #333 0%,#222 100%);
+	background: linear-gradient(top, #333 0%,#222 100%);
+	border: 1px solid #222;
+}
+#commentform input, #commentform textarea {border: 1px solid #333; color: #fff; background: #555;}
+.content .wp-pagenavi a, .content .wp-pagenavi span {
+	color:#222;
+	background: #fff;
+	background: -moz-linear-gradient(top, #fff 0%, #fdfdfd 100%);
+	background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#fff), color-stop(100%,#fdfdfd));
+	background: -webkit-linear-gradient(top, #fff 0%,#fdfdfd 100%);
+	background: -o-linear-gradient(top, #fff 0%,#fdfdfd 100%);
+	background: -ms-linear-gradient(top, #fff 0%,#fdfdfd 100%);
+	background: linear-gradient(top, #fff 0%,#fdfdfd 100%);
+}
+	
+.wp-pagenavi a:hover, .wp-pagenavi span.current {
+	color:#fff;
+	background: #444;
+	background: -moz-linear-gradient(top, #444 0%, #222 100%);
+	background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#444), color-stop(100%,#222));
+	background: -webkit-linear-gradient(top, #444 0%,#222 100%);
+	background: -o-linear-gradient(top, #444 0%,#222 100%);
+	background: -ms-linear-gradient(top, #444 0%,#222 100%);
+	background: linear-gradient(top, #444 0%,#222 100%);
+}
+
+/* ---------------------------- */
+/*       Sidebar/Widgets colors
+/* ---------------------------- */
+
+.sidebar li a {color: #aaa;}
+.widget .lp-sidebar li {border-bottom: 1px solid #3a3a3a;}
+#footer .widget .lp-sidebar li img {background: #ddd;}
+.widget .lp-description span {color: #aaa;}
+.widget .lp-description p {color: #fafafa;}
+.widget .sidebar-search-form input {border: 1px solid #333;}
+
+/* ---------------------------------- */
+/*     Portfolio/Blog Masonry colors
+/* ---------------------------------- */
+.lp-image .triangle-up, .project-image .triangle-up, .blog-masonry-image .triangle-up {background:url(../images/dark/triangle-up.png) no-repeat;}
+.project-description h3 a, .blog-masonry-description h3 a, .item-title h3 a {color:#aaa;}
+.project-description h3 a:hover, .blog-masonry-description h3 a:hover, .item-title h3 a:hover {color:#fff;}
+.portfolio-standard .item {border-bottom: 1px solid #333;}
+.lp-readmore, .portfolio-boxed .project-description .project-readmore, .blog-masonry-readmore {background:url(../images/dark/link.png) no-repeat 0 0;}
+.lp-readmore:hover, .portfolio-boxed .project-description .project-readmore:hover, .blog-masonry .blog-masonry-readmore:hover {background:url(../images/dark/link.png) no-repeat 0 -16px;}
+#portfolio-filters a {
+	color: #888;
+	background: #fff;
+	background: -moz-linear-gradient(top, #fff 0%, #ddd 100%);
+	background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#fff), color-stop(100%,#ddd));
+	background: -webkit-linear-gradient(top, #fff 0%,#ddd 100%);
+	background: -o-linear-gradient(top, #fff 0%,#ddd 100%);
+	background: -ms-linear-gradient(top, #fff 0%,#ddd 100%);
+	background: linear-gradient(top, #fff 0%,#ddd 100%);
+	border: 1px solid #eee;
+}
+#portfolio-filters a:hover {color: #111;}
+#portfolio-filters li.current a {
+	color: #ddd;
+	background: #444;
+	background: -moz-linear-gradient(top, #666 0%, #444 100%);
+	background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#666), color-stop(100%,#444));
+	background: -webkit-linear-gradient(top, #666 0%,#444 100%);
+	background: -o-linear-gradient(top, #666 0%,#444 100%);
+	background: -ms-linear-gradient(top, #666 0%,#444 100%);
+	background: linear-gradient(top, #666 0%,#444 100%);
+	border: 1px solid #333;
+}
+#post-navigation .previous-link a, #post-navigation .next-link a, .comments-navigation .next-comments a,
+.comments-navigation .prev-comments a, a.portfolio-slide-next, a.portfolio-slide-prev {color: #eee;}
+
+/* ---------------------------- */
+/*        Plugins colors
+/* ---------------------------- */
+
+.tweetList li p {background: #eee;color: #444;}
+.tweetList li a {color: #888;}
+.twitter-triangle-down {border-top: 10px solid #eee;}
+#flickr-feed a {background: #aaa;}
+.es-nav span {background: #444 url(../images/dark/carousel-arrows.png) no-repeat -20px 0;}
+
+/* ---------------------------- */
+/*         Contact form
+/* ---------------------------- */
+
+#contact h1 { color: #333333; }
+#contact hr { border: 1px solid #d9d9d9; }
+#contact input, #contact textarea, #contact select, #contact input.submit {
+	color: #ddd;
+	background: #444;
+	border: 1px solid #111;
+}
+#contact input:focus, #contact textarea:focus, #contact select:focus, #contact input.submit:hover {
+	color: #eee;
+	background: #333;
+	border: 1px solid #111;
+}
+#contact input.submit {
+	background: #444;
+	background: #444 -moz-linear-gradient(top, rgba(255,255,255,.1) 0%, rgba(0,0,0,.1) 100%);
+	background: #444 -webkit-gradient(linear, left top, left bottom, color-stop(0%,rgba(255,255,255,.1)), color-stop(100%,rgba(0,0,0,.1)));
+	background: #444 -webkit-linear-gradient(top, rgba(255,255,255,.1) 0%,rgba(0,0,0,.1) 100%);
+	background: #444 -o-linear-gradient(top, rgba(255,255,255,.1) 0%,rgba(0,0,0,.1) 100%);
+	background: #444 -ms-linear-gradient(top, rgba(255,255,255,.1) 0%,rgba(0,0,0,.1) 100%);
+	background: #444 linear-gradient(top, rgba(255,255,255,.1) 0%,rgba(0,0,0,.1) 100%);
+}
+#contact input.submit:hover {
+	background: #333;
+	background: #333 -moz-linear-gradient(top, rgba(255,255,255,.1) 0%, rgba(0,0,0,.1) 100%);
+	background: #333 -webkit-gradient(linear, left top, left bottom, color-stop(0%,rgba(255,255,255,.1)), color-stop(100%,rgba(0,0,0,.1)));
+	background: #333 -webkit-linear-gradient(top, rgba(255,255,255,.1) 0%,rgba(0,0,0,.1) 100%);
+	background: #333 -o-linear-gradient(top, rgba(255,255,255,.1) 0%,rgba(0,0,0,.1) 100%);
+	background: #333 -ms-linear-gradient(top, rgba(255,255,255,.1) 0%,rgba(0,0,0,.1) 100%);
+	background: #333 linear-gradient(top, rgba(255,255,255,.1) 0%,rgba(0,0,0,.1) 100%);
+}
+#contact select:focus {color: #444;}
+.ie #contact select option {padding: 10px; background: #bbb;}
+.ie #contact select:focus {background: #bbb; color: #fff;}
+.contact-address {background: url(../images/dark/contact-icons.png) no-repeat 0 0;}
+.contact-mail {background: url(../images/dark/contact-icons.png) no-repeat 0 -20px;}
+.contact-phone {background: url(../images/dark/contact-icons.png) no-repeat 0 -40px;}
+
+/* ---------------------------------- */
+/*    Flexslider and other sliders
+/* ---------------------------------- */
+
+.flexslider .slides {border:10px solid #444;}
+.flexslider .slides > li {background: #444;}
+.container .flex-caption {-ms-filter:progid:DXImageTransform.Microsoft.gradient(startColorstr=#4C000000,endColorstr=#4C000000);
+filter:progid:DXImageTransform.Microsoft.gradient(startColorstr=#4C000000,endColorstr=#4C000000);}
+.container .flex-caption {background: rgba(0,0,0,.6); color: #fff;}
+.container .flex-direction-nav li .next {background: url(../images/slider/dark/arrows.png) no-repeat -32px 0;}
+.container .flex-direction-nav li .prev {background: url(../images/slider/dark/arrows.png) no-repeat 0 0;}
+.container .flex-direction-nav li .next:hover {background: url(../images/slider/dark/arrows.png) no-repeat -32px -34px;}
+.container .flex-direction-nav li .prev:hover {background: url(../images/slider/dark/arrows.png) no-repeat 0 -34px;}
+.container .flex-control-nav li a {background: url(../images/slider/dark/slider-pagination.png) no-repeat 0 0;}
+.container .flex-control-nav li a:hover {background: url(../images/slider/dark/slider-pagination.png) no-repeat 0 -17px;}
+.container .flex-control-nav li a.active {background: url(../images/slider/dark/slider-pagination.png) no-repeat 0 -34px;}
+
+.content-slider .cs-slidecontrols li a.next {background: #eee url(../images/light/carousel-arrows.png) no-repeat 0 0;}
+.content-slider .cs-slidecontrols li a.prev {background: #eee url(../images/light/carousel-arrows.png) no-repeat -20px 0;}
+
+/* ---------------------------- */
+/*        Standard color
+/* ---------------------------- */
+
+.highlight, #flickr-feed a:hover, .sidebar .lp-image a img:hover, .content a:hover, .portfolio-categories a:hover, #footer a:hover, #footer-bottom a:hover,
+.feature-box:hover .content-inner, .slogan a:hover, .feature-box:hover img, .feature-box:hover .feature-box-title h5 span,
+.content-slider .cs-slidecontrols li a, #footer .widget .lp-sidebar li img:hover {background: #F5CA2C;}
+
+.feature-box:hover .feature-box-title h5 {background: #F5CA2C url(../images/light/headers-bg.png) repeat-x center left;}
+.feature-box:hover .feature-box-title h5, .feature-box:hover .feature-box-desc, .feature-box:hover .feature-box-desc a {color: #000;}
+
+.container ul.tabs li a.active {border-top: 2px solid #F5CA2C;}
+
+.es-nav span:hover {background: #F5CA2C url(../images/light/carousel-arrows.png) no-repeat -20px 0;}
+.es-nav span.es-nav-next:hover {background: #F5CA2C url(../images/light/carousel-arrows.png) no-repeat 0 0;}
+.content-slider .cs-slidecontrols li a.next:hover {background: #F5CA2C url(../images/light/carousel-arrows.png) no-repeat 0 0;}
+.content-slider .cs-slidecontrols li a.prev:hover {background: #F5CA2C url(../images/light/carousel-arrows.png) no-repeat -20px 0;}
+
+::-moz-selection {background-color: #F5CA2C;}
+::-webkit-selection {background-color: #F5CA2C;}
+::selection {background-color: #F5CA2C;}
+::-moz-selection {color: #000;}
+::-webkit-selection {color: #000;}
+::selection {color: #000;}
+
+#nav ul a:hover {border-bottom: 1px solid #F5CA2C;}
+.content a, .portfolio-categories a {color: #F5CA2C;}
+.portfolio-standard .item:hover {border-bottom: 1px solid #F5CA2C;}
+.portfolio-triangle-up {border-bottom: 5px solid #F5CA2C;}
+.post-standard {background: #F5CA2C url(../images/dark/blog-post-icons.png) no-repeat 0 0;}
+.post-gallery {background: #F5CA2C url(../images/dark/blog-post-icons.png) no-repeat 0 -50px;}
+.post-video {background: #F5CA2C url(../images/dark/blog-post-icons.png) no-repeat 0 -100px;}
+.post-audio {background: #F5CA2C url(../images/dark/blog-post-icons.png) no-repeat 0 -150px;}
+.post-link {background: #F5CA2C url(../images/dark/blog-post-icons.png) no-repeat 0 -200px;}
+.post-quote {background: #F5CA2C url(../images/dark/blog-post-icons.png) no-repeat 0 -250px;}
+
+.highlight, .content a:hover, .portfolio-categories a:hover, #footer a:hover, #footer-bottom a:hover, #post-navigation .previous-link a:hover,
+#post-navigation .next-link a:hover, .comments-navigation .next-comments a:hover, .comments-navigation .prev-comments a:hover,
+a.portfolio-slide-next:hover, a.portfolio-slide-prev:hover, .slogan a:hover, .content-slider .cs-slidecontrols li a {color: #000;}

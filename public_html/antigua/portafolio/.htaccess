@@ -1,0 +1,17 @@
+
+# End default subdomain redirect #
+ErrorDocument 400 http://portfolio.jjpm.cl
+ErrorDocument 401 http://portfolio.jjpm.cl
+ErrorDocument 403 http://portfolio.jjpm.cl
+ErrorDocument 404 http://portfolio.jjpm.cl
+ErrorDocument 405 http://portfolio.jjpm.cl
+ErrorDocument 408 http://portfolio.jjpm.cl
+ErrorDocument 415 http://portfolio.jjpm.cl
+ErrorDocument 500 http://portfolio.jjpm.cl
+ErrorDocument 501 http://portfolio.jjpm.cl
+ErrorDocument 502 http://portfolio.jjpm.cl
+ErrorDocument 503 http://portfolio.jjpm.cl
+ErrorDocument 504 http://portfolio.jjpm.cl
+ErrorDocument 505 http://portfolio.jjpm.cl
+
+RewriteEngine on

@@ -1,0 +1,70 @@
+/*
+ * jQuery FlexSlider v1.8
+ * http://flex.madebymufffin.com
+ *
+ * Copyright 2011, Tyler Smith
+ * Free to use under the MIT license.
+ * http://www.opensource.org/licenses/mit-license.php
+ */
+ 
+/* Browser Resets */
+.flex-container a:active,
+.flexslider a:active {outline: none;}
+.slides,
+.flex-control-nav,
+.flex-direction-nav {margin: 0; padding: 0; list-style: none;} 
+
+/* FlexSlider Necessary Styles
+*********************************/ 
+.flexslider {width: 100%; margin: 0; padding: 0;}
+.flexslider .slides > li {display: none;} /* Hide the slides before the JS is loaded. Avoids image jumping */
+.flexslider .slides img {max-width: 100%; display: block; margin: 0 auto;}
+.flex-pauseplay span {text-transform: capitalize;}
+
+/* Clearfix for the .slides element */
+.slides:after {content: "."; display: block; clear: both; visibility: hidden; line-height: 0; height: 0;} 
+html[xmlns] .slides {display: block;} 
+* html .slides {height: 1%;}
+
+/* No JavaScript Fallback */
+/* If you are not using another script, such as Modernizr, make sure you
+ * include js that eliminates this class on page load */
+.no-js .slides > li:first-child {display: block;}
+
+
+/* FlexSlider Default Theme
+*********************************/
+.flexslider {position: relative; zoom: 1; margin-bottom: 50px;}
+.flexslider .slides {zoom: 1;}
+.flexslider .slides > li {position: relative; margin-bottom: 0;}
+/* Suggested container for "Slide" animation setups. Can replace this with your own, if you wish */
+.flex-container {zoom: 1; position: relative;}
+
+/* Caption style */
+/* IE rgba() hack */
+.flex-caption {background:none; zoom: 1;}
+.flex-caption {width: 36%; padding: 2%; position: absolute; left: 0; bottom: 30%; font-size: 14px; line-height: 18px;}
+
+/* Direction Nav */
+.flex-direction-nav li a {margin: -13px 0 0; display: block; position: absolute; bottom: 15px; cursor: pointer; text-indent: -9999px; z-index: 999;}
+.flex-direction-nav li .next {width: 32px; height: 34px; right: 17px;}
+.flex-direction-nav li .prev {width: 33px; height: 34px; right: 48px;}
+.flex-direction-nav li .disabled {opacity: .3; filter:alpha(opacity=30); cursor: default;}
+
+/* Control Nav */
+.flex-control-nav {position: absolute; bottom: 15px; left: 20px; width: 70%; z-index: 999;}
+.flex-control-nav li {margin: 0 0 0 5px; display: inline-block; zoom: 1; *display: inline;}
+.flex-control-nav li:first-child {margin: 0;}
+.flex-control-nav li a {width: 16px; height: 17px; display: block; cursor: pointer; text-indent: -9999px;}
+.flex-control-nav li a.active {cursor: default;}
+
+/* FlexSlider Portfolio and Custom Image Slider Theme
+******************************************************/
+
+.portfolio-single-slider .flexslider-portfolio, .content .flexslider.mini {position: relative; zoom: 1; margin-bottom: 0;}
+.portfolio-single-slider .flexslider-portfolio .slides, .content .flexslider.mini .slides {zoom: 1;border:none;}
+.portfolio-single-slider .flexslider-portfolio .slides img, .content .flexslider.mini .slides img {padding: 0;}
+.portfolio-single-slider .flex-direction-nav li, .content .flexslider.mini .flex-direction-nav li {margin-bottom: 0;}
+.portfolio-single-slider .flex-direction-nav li a, .content .flexslider.mini .flex-direction-nav li a {top: 22px; right: 10px;-webkit-transition:none;-moz-transition:none;-o-transition:none;transition:none;}
+.portfolio-single-slider .flex-direction-nav li .next, .content .flexslider.mini .flex-direction-nav li .next {right: 10px;}
+.portfolio-single-slider .flex-direction-nav li .prev, .content .flexslider.mini .flex-direction-nav li .prev {right: 41px;}
