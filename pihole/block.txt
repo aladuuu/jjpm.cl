@@ -322,3 +322,5 @@ www.get-express-vpn.com
 crt.livejasmin.com
 livejasmin.com
 jsmcrptjmp.com
+s.opoxv.com
+opoxv.com
