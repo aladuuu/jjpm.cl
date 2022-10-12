@@ -1,4 +1,5 @@
 @import url("https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,900");
+@import url('https://fonts.googleapis.com/css2?family=Nabla&display=swap');
 @import url("font-awesome.min.css");
 
 /*
@@ -59,7 +60,7 @@
 /* Basic */
 
 	body, input, select, textarea {
-		color: #fff;
+		color: #f4cf0d;
 		font-family: 'Source Sans Pro', sans-serif;
 		font-size: 15pt;
 		font-weight: 300 !important;
@@ -93,6 +94,11 @@
 		a:hover {
 			border-color: transparent;
 		}
+
+	h1 {
+		font-family: 'Nabla', cursive;
+	}	
+
 
 /* Icon */
 
@@ -514,7 +520,7 @@
 	}
 
 		#header h1 {
-			font-size: 4.35em;
+			font-size: 8em;
 			font-weight: 900;
 			letter-spacing: -0.035em;
 			line-height: 1em;
@@ -635,7 +641,7 @@
 					-ms-transition: all 0.2s ease-in-out;
 					transition: all 0.2s ease-in-out;
 					border-radius: 100%;
-					border: solid 1px #fff;
+					border: solid 1px #f4cf0d;
 					display: block;
 					font-size: 1.75em;
 					height: 2.5em;
@@ -939,7 +945,7 @@
 	/* Header */
 
 		#header h1 {
-			font-size: 2.5em;
+			font-size: 5em;
 		}
 
 		#header p {
