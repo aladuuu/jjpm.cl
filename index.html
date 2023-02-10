@@ -1,45 +1,16 @@
 <!DOCTYPE html>
-<html lang="es">
-<head>
-	<meta charset="utf-8">
-	<meta http-equiv="X-UA-Compatible" content="IE=edge">
-	<meta name="viewport" content="width=device-width, initial-scale=1">
-	<meta name="title" content="JJPM!">
-	<meta name="description" content="JJPM!">
-	<meta name="keywords" content="chile, santiago">
-	<meta name="robots" content="index, follow">
-	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-	<meta name="language" content="Spanish">
-	<meta name="revisit-after" content="15 days">
-	<link rel="canonical" href="https://jjpm.cl">
-	<link rel="stylesheet" href="assets/css/jjpm.css" />
-	<link rel="shortcut icon" href="favicon.ico" />
-	<!--[if lte IE 8]><script src="assets/js/ie/html5shiv.js"></script><![endif]-->
-	<!--[if lte IE 8]><link rel="stylesheet" href="assets/css/ie8.css" /><![endif]-->
-	<!--[if lte IE 9]><link rel="stylesheet" href="assets/css/ie9.css" /><![endif]-->
-	<title>JJPM!</title>
-</head>
-<body class="loading">
-	<div id="wrapper">
-		<div id="bg"></div>
-		<div id="overlay"></div>
-		<div id="main">
-			<header id="header">
-				<h1>JJPM!</h1>
-				<p>Industrial Designer &nbsp;&bull;&nbsp; Jiu Jitsu Enthusiast</p>
-				<nav>
-					<ul>
-						<li><a href="mailto:contacto@jjpm.cl" class="icon fa-envelope"><span class="label">Email</span></a></li>
-						<li><a href="dl/890B31D2.asc" class="icon fa-key"><span class="label">PGP Key</span></a></li>
-					</ul>
-				</nav>
-			</header>
-			<footer id="footer">
-				<span class="copyright">&copy;<span id="year"></span> JJPM.cl</span>
-			</footer>
-		</div>
-	</div>
-	<!--[if lte IE 8]><script src="assets/js/ie/respond.min.js"></script><![endif]-->
-	<script src="assets/js/jjpm.js"></script>
-</body>
+<html>
+    <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>JJPM</title>
+        <link rel="stylesheet" href="./css/style.css">
+    </head>
+    <body onload="setInterval(updateDateTime, 1000)">
+        <div>
+            <div><h1><a href="mailto://contacto@jjpm.cl">JJPM</a></h1></div>
+            <div><h2><span id="fecha"></span></h2></div>
+        </div>
+        <script src="./js/fondo.js"></script>
+        <script src="./js/fecha.js"></script>
+    </body>
 </html>
