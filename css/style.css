@@ -18,6 +18,10 @@ h1 {
   margin: 0;
   text-align: center;
 }
+h1 :link{
+    text-decoration: none;
+    color: whitesmoke;
+}
 h2 {
     font-family: "Orbitron", sans-serif;
     font-size: 1.5rem;
@@ -34,7 +38,3 @@ h2 {
       font-size: 2.3rem;
     }
   }
-h1 :link{
-    text-decoration: none;
-    color: whitesmoke;
-}
