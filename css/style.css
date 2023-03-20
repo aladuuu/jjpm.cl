@@ -1,10 +1,4 @@
 @import url('https://fonts.googleapis.com/css2?family=Orbitron&display=swap');
-@font-face {
-    font-family: 'JJPM';
-    src: url('./Space-Italic.woff') format('woff');
-    font-weight: normal;
-    font-style: normal;
-}
 body {
   margin: 0;
   padding: 0;
@@ -43,54 +37,4 @@ h2 {
 h1 :link{
     text-decoration: none;
     color: whitesmoke;
-}
-/*CONTACTO*/
-#form-overlay {
-    display: none;
-    position: fixed;
-    top: 0;
-    right: 0;
-    bottom: 0;
-    left: 0;
-    background-color: rgba(0, 0, 0, 0.7);
-    z-index: 1;
-}
-form {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    background-color: rgba(0, 0, 0, 0.450);
-    padding: 20px;
-    border-radius: 5px;
-    max-width: 500px;
-    max-height: 500px;
-    width: 90%;
-    height: 90%;
-    box-sizing: border-box;
-    text-align: center;
-    color: white;
-    font-family: "Orbitron", sans-serif;
-    font-size: 1rem;
-}
-@media (max-width: 767px) {
-    form {
-        width: 100%;
-        padding: 10px;
-    }
-}
-.buttons {
-    margin-top: 20px;
-    display: inline-block;
-}
-input:is([type="button"], [type="submit"], [type="reset"]), input[type="file"]::file-selector-button, button {
-    font-family: "Orbitron", sans-serif;
-    font-size: 1rem;
-    color: white;
-    background-color: rgba(0, 0, 0, 0);
-    border: none;
-}
-#open-form {
-    color: whitesmoke;
-    text-shadow: 1px 1px blue;
 }
