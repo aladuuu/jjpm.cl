@@ -1,0 +1,37 @@
+    /* Estilo para el cuerpo de la página */
+    body {
+    background-color: #2c2c2c; /* Color de fondo oscuro */
+    color: #ffffff; /* Color de texto claro */
+    }
+
+    /* Estilo para las cards */
+    .card {
+    background-color: #333333; /* Color de fondo de las cards */
+    border: 1px solid #444444; /* Borde de las cards */
+    color: #ffffff; /* Color de texto dentro de las cards */
+    }
+
+    /* Estilo para el botón dentro de las cards */
+    .btn-dark {
+    background-color: #555555; /* Color de fondo del botón */
+    border-color: #555555; /* Color del borde del botón */
+    color: #ffffff; /* Color del texto del botón */
+    }
+
+    /* Estilo para el botón al hacer hover */
+    .btn-dark:hover {
+    background-color: #444444; /* Color de fondo del botón al pasar el mouse */
+    border-color: #444444; /* Color del borde del botón al pasar el mouse */
+    }
+
+    /* Estilo para el contenedor de la galería */
+    .container {
+    max-width: 900px; /* Ancho máximo del contenedor de la galería */
+    }
+
+    .card-img, .card-img-top {
+        border-top-left-radius: calc(.25rem - 1px);
+        border-top-right-radius: calc(.25rem - 1px);
+        border-bottom-left-radius: calc(.25rem - 1px);
+        border-bottom-right-radius: calc(.25rem - 1px);
+    }
