@@ -160,6 +160,7 @@ h2 {
 .modal {
   display: none;
   position: fixed;
+  overflow: scroll;
   z-index: 1000;
   left: 0;
   top: 0;
@@ -183,7 +184,7 @@ h2 {
 
 .close {
   color: #aaa;
-  float: right;
+  align-self: flex-end;
   font-size: 28px;
   font-weight: bold;
   cursor: pointer;
@@ -205,6 +206,10 @@ h2 {
   align-items: center;
 }
 
+.buscador input {
+  height: 40px;
+}
+
 #date-input,
 #search-date, .apod {
   padding: 10px;
@@ -220,8 +225,7 @@ h2 {
   font-size: 12px;
 }
 
-#date-input:hover,
-#search-date:hover, .apod:hover {
+#date-input:hover, #search-date:hover, .apod:hover {
   background-color: white;
   color: black;
 }
