@@ -1,0 +1,263 @@
+@import url("https://fonts.googleapis.com/css2?family=Orbitron&display=swap");
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  overflow: hidden;
+}
+
+body {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: black;
+  font-family: "Orbitron", sans-serif;
+  color: whitesmoke;
+}
+
+#background-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+#background-video {
+  position: fixed;
+  right: 0;
+  bottom: 0;
+  min-width: 100%;
+  min-height: 100%;
+  width: auto;
+  height: auto;
+  z-index: -1;
+  object-fit: cover;
+}
+
+.content {
+  text-align: center;
+  z-index: 1;
+}
+
+h1 {
+  font-size: 6rem;
+  text-shadow: 1px 1px blue;
+  margin: 0;
+}
+
+h1 a {
+  text-decoration: none;
+  color: whitesmoke;
+}
+
+h2 {
+  font-size: 1.5rem;
+  text-shadow: 1px 1px blue;
+  margin: 0;
+}
+
+
+@media only screen and (min-width: 768px) {
+  h1 {
+    font-size: 9rem;
+  }
+  h2 {
+    font-size: 2.3rem;
+  }
+}
+
+.search-button {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  width: 40px;
+  height: 40px;
+  background-color: rgba(255, 255, 255, 0);
+  border: solid 1px red;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 0;
+  fill: red;
+}
+
+.search-button:hover {
+  background-color: red;
+  fill: white;
+}
+
+.search-icon {
+  width: 24px;
+  height: 24px;
+}
+
+.web-button {
+  position: fixed;
+  top: 80px;
+  right: 20px;
+  width: 38px;
+  height: 38px;
+  background-color: rgba(255, 255, 255, 0);
+  border: solid 1px red;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 0;
+  fill: red;
+}
+
+.web-button:hover {
+  background-color: red;
+  fill: white;
+}
+
+.web-icon {
+  width: 24px;
+  height: 24px;
+}
+
+.mail-button {
+  position: fixed;
+  top: 140px;
+  right: 20px;
+  width: 38px;
+  height: 38px;
+  background-color: rgba(255, 255, 255, 0);
+  border: solid 1px red;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 0;
+  fill: red;
+}
+
+.mail-button:hover {
+  background-color: red;
+  fill: white;
+}
+
+.mail-icon {
+  width: 24px;
+  height: 24px;
+}
+
+.modal {
+  display: none;
+  position: fixed;
+  z-index: 1000;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.7);
+  text-align: center;
+}
+
+.modal-content {
+  background-color: rgba(0, 0, 0, 0.8);
+  margin: 15% auto;
+  padding: 20px;
+  border: 1px solid #888;
+  width: 80%;
+  max-width: 800px;
+  color: white;
+  font-family: "Orbitron", sans-serif;
+  border-radius: 10px;
+}
+
+.close {
+  color: #aaa;
+  float: right;
+  font-size: 28px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.close:hover,
+.close:focus {
+  color: #fff;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.buscador {
+  margin-top: 40px;
+  width: 100%;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+#date-input,
+#search-date, .apod {
+  padding: 10px;
+  font-family: "Orbitron", sans-serif;
+  border-radius: 5px;
+  border: solid 1px white;
+  background-color: black;
+  color: white;
+  width: 100%;
+  box-sizing: border-box;
+  margin-bottom: 10px;
+  text-decoration: none;
+  font-size: 12px;
+}
+
+#date-input:hover,
+#search-date:hover, .apod:hover {
+  background-color: white;
+  color: black;
+}
+
+#modal-result {
+  margin-top: 20px;
+}
+
+#modal-result img,
+#modal-result video {
+  max-width: 100%;
+  height: auto;
+  text-align: center;
+  align-content: center;
+  border-radius: 10px;
+}
+
+#modal-result iframe {
+  max-width: 100%;
+  height: auto;
+  aspect-ratio: 16 / 9;
+}
+
+#apply-background {
+  margin-top: 20px;
+  padding: 10px 15px;
+  background-color: black;
+  color: white;
+  border: solid 1px white;
+  border-radius: 5px;
+  cursor: pointer;
+  font-family: "Orbitron", sans-serif;
+  width: 100%;
+}
+
+#apply-background:hover {
+  background-color: white;
+  color: black;
+}

@@ -1,16 +1,86 @@
 <!DOCTYPE html>
 <html>
-    <head>
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <title>JJPM</title>
-        <link rel="stylesheet" href="./css/style.css">
-    </head>
-    <body>
-        <div>
-            <div><h1><a href="mailto:contacto@jjpm.cl">JJPM</a></h1></div>
-            <div><h2><span id="fecha"></span></h2></div>
+  <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>JJPM</title>
+    <link rel="stylesheet" href="./css/jjpm.css" />
+  </head>
+  <body>
+    <div id="background-container"></div>
+    <div class="content">
+      <div>
+        <h1><a href="mailto:contacto@jjpm.cl">JJPM</a></h1>
+      </div>
+      <div>
+        <h2><span id="fecha"></span></h2>
+      </div>
+    </div>
+    <button
+      id="search-button"
+      class="search-button"
+      aria-label="Buscar por fecha"
+    >
+      <svg
+        class="search-icon"
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 24 24"
+        width="24"
+        height="24"
+      >
+        <path
+          d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"
+        />
+      </svg>
+    </button>
+
+    <a href="/webs/index.html" class="web-button">
+      <svg
+        class="web-icon"
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 24 24"
+        width="24"
+        height="24"
+      >
+        <path
+          d="M10 4H4C2.9 4 2 4.9 2 6v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2h-6V2H10v2zm-4 0V2h8v2h-8zM4 8h16v10H4V8z"
+        />
+      </svg>
+    </a>
+
+    <a href="mailto:contacto@jjpm.cl" class="mail-button">
+      <svg
+        class="mail-icon"
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 24 24"
+        width="24"
+        height="24"
+      >
+        <path
+          d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4-8 5-8-5V6l8 5 8-5v2z"
+        />
+      </svg>
+    </a>
+
+    <div id="modal" class="modal">
+      <div class="modal-content">
+        <span class="close">&times;</span>
+        <h2>Buscar imagen APOD</h2>
+        <div class="buscador">
+          <input type="date" id="date-input" />
+          <button id="search-date">Buscar</button>
+          <a
+            href="https://apod.nasa.gov/apod/archivepixFull.html"
+            target="_blank"
+            class="apod"
+            >Ver directorio NASA</a
+          >
         </div>
-        <script src="./js/fondo.js"></script>
-        <script src="./js/fecha.js"></script>
-    </body>
+        <div id="modal-result"></div>
+        <button id="apply-background" style="display: none">
+          Aplicar como fondo
+        </button>
+      </div>
+    </div>
+    <script src="./js/jjpm.js"></script>
+  </body>
 </html>

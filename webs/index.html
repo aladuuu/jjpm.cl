@@ -3,17 +3,19 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-  <title>Trabajos web</title>
+  <title>JJPM | ÚLTIMOS PROYECTOS</title>
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
   <link rel="stylesheet" href="./style.css">
 </head>
 <body>
 
 <div class="container mt-5">
+  <div class="text-center mb-5"><h1>ÚLTIMOS PROYECTOS</h1></div>
   <div class="row" id="gallery"></div>
+  <div class="text-center"><a href="/" class="btn btn-secondary w-100 mt-3 mb-5">Volver</a></div>
 </div>
 <div class="text-center p-3">
-  <p class="mb-0">JJPM &copy; <span id="year"></span></p>
+  <p class="mb-0"><a href="https://jjpm.cl">JJPM</a> &copy; <span id="year"></span></p>
 </div>
 <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
@@ -60,10 +62,8 @@
         $(this).remove();
       });
     }
-      // Obtener el año actual
       var year = new Date().getFullYear();
 
-      // Mostrar el año actual en el elemento con id "year"
       document.getElementById("year").innerText = year;
 </script>
 </body>
