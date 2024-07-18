@@ -129,9 +129,37 @@ h2 {
   height: 24px;
 }
 
-.mail-button {
+.cert-button {
   position: fixed;
   top: 140px;
+  right: 20px;
+  width: 38px;
+  height: 38px;
+  background-color: rgba(255, 255, 255, 0);
+  border: solid 1px red;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 0;
+  fill: red;
+}
+
+.cert-button:hover {
+  background-color: red;
+  fill: white;
+}
+
+.cert-icon {
+  width: 24px;
+  height: 24px;
+}
+
+.mail-button {
+  position: fixed;
+  top: 200px;
   right: 20px;
   width: 38px;
   height: 38px;

@@ -3,7 +3,10 @@
   <head>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>JJPM</title>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link
+      rel="stylesheet"
+      href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+    />
     <link rel="stylesheet" href="./css/jjpm.css" />
   </head>
   <body>
@@ -24,13 +27,19 @@
       <svg
         class="search-icon"
         xmlns="http://www.w3.org/2000/svg"
-        viewBox="0 0 24 24"
-        width="24"
-        height="24"
+        enable-background="new 0 0 50 50"
+        viewBox="0 0 50 50"
+        id="stars"
       >
-        <path
-          d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"
-        />
+        <polygon
+          points="40.37 15.41 43.26 24.32 35.69 18.81 28.11 24.32 31.01 15.41 23.43 9.91 32.79 9.91 35.69 1 38.58 9.91 47.94 9.91"
+        ></polygon>
+        <polygon
+          points="26.57 17.31 19 22.81 21.89 31.72 14.32 26.22 6.74 31.72 9.63 22.81 2.06 17.31 11.42 17.31 14.32 8.41 17.21 17.31"
+        ></polygon>
+        <polygon
+          points="38.6 34.6 31.02 40.1 33.92 49 26.34 43.5 18.77 49 21.66 40.1 14.09 34.6 23.45 34.6 26.34 25.69 29.24 34.6"
+        ></polygon>
       </svg>
     </button>
 
@@ -38,12 +47,25 @@
       <svg
         class="web-icon"
         xmlns="http://www.w3.org/2000/svg"
-        viewBox="0 0 24 24"
-        width="24"
-        height="24"
+        viewBox="0 0 100 100"
+        id="portfolio"
       >
         <path
-          d="M10 4H4C2.9 4 2 4.9 2 6v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2h-6V2H10v2zm-4 0V2h8v2h-8zM4 8h16v10H4V8z"
+          d="M46.5 55.5c-1-.9-1.5-2.2-1.5-3.5 0-1.1.4-2.1 1-3h8c1.5 2 1.3 4.7-.5 6.5-1.9 2-5.1 2-7 0zm9.9 2.8C54.6 60.1 52.3 61 50 61c-2.3 0-4.6-.9-6.4-2.6-1.7-1.7-2.6-4-2.6-6.4 0-1 .2-2 .5-3H9v32c0 3.3 2.7 6 6 6h70c3.3 0 6-2.7 6-6V49H58.5c1.1 3.2.4 6.8-2.1 9.3zM85 25H15c-3.3 0-6 2.7-6 6v14h82V31c0-3.3-2.7-6-6-6zM64 13H36v8h28v-8z"
+        ></path>
+      </svg>
+    </a>
+
+    <a href="/certs/index.html" class="cert-button">
+      <svg
+        class="cert-icon"
+        xmlns="http://www.w3.org/2000/svg"
+        width="24"
+        height="24"
+        viewBox="0 0 24 24"
+      >
+        <path
+          d="M23.873 9.81c.087-.251.127-.509.127-.764 0-.77-.38-1.514-1.055-1.981-2.153-1.492-1.868-1.117-2.679-3.543-.34-1.013-1.319-1.697-2.424-1.697h-.007c-2.653.009-2.193.151-4.334-1.354-.446-.314-.974-.471-1.501-.471s-1.055.157-1.502.471c-2.156 1.515-1.686 1.362-4.334 1.353h-.007c-1.104 0-2.084.685-2.422 1.697-.812 2.432-.534 2.056-2.678 3.544-.677.469-1.057 1.212-1.057 1.983 0 .254.042.511.127.762.831 2.428.829 1.962 0 4.38-.085.251-.127.507-.127.762 0 .77.38 1.514 1.057 1.983 2.146 1.49 1.868 1.113 2.679 3.543.338 1.013 1.317 1.697 2.422 1.697h.007c2.653-.009 2.193-.152 4.334 1.353.446.314.974.472 1.501.472s1.055-.158 1.502-.471c2.141-1.504 1.679-1.362 4.334-1.353h.007c1.104 0 2.084-.685 2.424-1.697.811-2.427.525-2.052 2.679-3.543.674-.469 1.054-1.213 1.054-1.983 0-.254-.04-.512-.127-.763-.831-2.428-.827-1.963 0-4.38zm-13.373 6.94l-4.5-4.364 1.858-1.857 2.642 2.505 5.642-5.783 1.858 1.857-7.5 7.642z"
         />
       </svg>
     </a>
@@ -67,7 +89,7 @@
         <span class="close">&times;</span>
         <h2>Buscar imagen APOD</h2>
         <div class="buscador">
-          <input type="date" id="date-input" class="form-control"/>
+          <input type="date" id="date-input" class="form-control" />
           <button id="search-date">Buscar</button>
           <a
             href="https://apod.nasa.gov/apod/archivepixFull.html"
