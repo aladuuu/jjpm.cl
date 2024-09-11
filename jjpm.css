@@ -1,0 +1,106 @@
+body,
+html {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  font-family: "Menlo", "Monaco", "Courier New", monospace;
+  overflow: hidden;
+}
+#background-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-color: #333;
+}
+#terminal-container {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 95%;
+  height: 90%;
+  background-color: rgba(0, 0, 0, 0.7);
+  border-radius: 10px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+}
+#terminal {
+  flex-grow: 1;
+  overflow-y: auto;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+}
+#terminal-content {
+  flex-grow: 1;
+  color: #0f0;
+  font-size: 14px;
+  line-height: 1.5;
+}
+#terminal-content a {
+  color: #00e5ff;
+  text-decoration: none;
+}
+
+#terminal-content a:hover {
+  text-decoration: underline;
+}
+#input-line {
+  display: flex;
+  align-items: center;
+  padding: 10px 20px;
+  background-color: rgba(0, 0, 0, 0.7);
+  border-top: 1px solid #333;
+}
+#prompt {
+  margin-right: 5px;
+  color: #0f0;
+}
+#input-container {
+  position: relative;
+  flex-grow: 1;
+}
+#input {
+  background-color: transparent;
+  border: none;
+  color: #0f0;
+  font-family: inherit;
+  font-size: 16px;
+  width: 100%;
+  outline: none;
+}
+#cursor {
+  position: absolute;
+  width: 8px;
+  height: 15px;
+  background-color: #0f0;
+  display: inline-block;
+  animation: blink 0.7s infinite;
+  top: 2px;
+}
+@keyframes blink {
+  0% {
+    opacity: 0;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+#measure-text {
+  position: absolute;
+  visibility: hidden;
+  height: auto;
+  width: auto;
+  white-space: nowrap;
+}
