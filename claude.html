@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Emulador de Agua con Física</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+```
+    body {
+        font-family: 'Arial', sans-serif;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 20px;
+        overflow: hidden;
+    }
+
+    .container {
+        position: relative;
+        width: 350px;
+        height: 500px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 20px;
+        border: 3px solid rgba(255, 255, 255, 0.3);
+        backdrop-filter: blur(10px);
+        box-shadow: 0 25px 45px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+    }
+
+    .water {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 70%;
+        background: linear-gradient(180deg, 
+            rgba(52, 152, 219, 0.8) 0%,
+            rgba(41, 128, 185, 0.9) 50%,
+            rgba(26, 117, 159, 1) 100%);
+        border-radius: 0 0 17px 17px;
+        transition: transform 0.1s ease-out;
+        overflow: hidden;
+    }
+
+    .water::before {
+        content: '';
+        position: absolute;
+        top: -5px;
+        left: 0;
+        right: 0;
+        height: 10px;
+        background: linear-gradient(90deg, 
+            transparent 0%, 
+            rgba(255, 255, 255, 0.3) 50%, 
+            transparent 100%);
+        animation: wave 2s ease-in-out infinite;
+    }
+
+    .water::after {
+        content: '';
+        position: absolute;
+        top: -3px;
+        left: 0;
+        right: 0;
+        height: 6px;
+        background: linear-gradient(90deg, 
+            transparent 0%, 
+            rgba(255, 255, 255, 0.2) 50%, 
+            transparent 100%);
+        animation: wave 3s ease-in-out infinite reverse;
+    }
+
+    @keyframes wave {
+        0%, 100% { transform: translateX(-100px); }
+        50% { transform: translateX(100px); }
+    }
+
+    .ball {
+        position: absolute;
+        width: 50px;
+        height: 50px;
+        background: radial-gradient(circle at 30% 30%, 
+            #ff6b6b, 
+            #ee5a24 70%, 
+            #c23616);
+        border-radius: 50%;
+        box-shadow: 
+            0 5px 15px rgba(0, 0, 0, 0.3),
+            inset -5px -5px 10px rgba(0, 0, 0, 0.2),
+            inset 5px 5px 10px rgba(255, 255, 255, 0.3);
+        transition: transform 0.05s ease-out;
+        z-index: 10;
+    }
+
+    .ball::before {
+        content: '';
+        position: absolute;
+        top: 10px;
+        left: 15px;
+        width: 15px;
+        height: 10px;
+        background: rgba(255, 255, 255, 0.6);
+        border-radius: 50%;
+        filter: blur(2px);
+    }
+
+    .info-panel {
+        position: absolute;
+        top: 20px;
+        left: 20px;
+        right: 20px;
+        background: rgba(0, 0, 0, 0.7);
+        color: white;
+        padding: 15px;
+        border-radius: 10px;
+        font-size: 12px;
+        z-index: 100;
+    }
+
+    .debug-info {
+        margin-top: 10px;
+        font-size: 10px;
+        opacity: 0.8;
+    }
+
+    .ripple {
+        position: absolute;
+        border: 2px solid rgba(255, 255, 255, 0.6);
+        border-radius: 50%;
+        pointer-events: none;
+        animation: ripple 1s ease-out forwards;
+    }
+
+    @keyframes ripple {
+        0% {
+            width: 0;
+            height: 0;
+            opacity: 1;
+        }
+        100% {
+            width: 100px;
+            height: 100px;
+            opacity: 0;
+        }
+    }
+
+    .bubble {
+        position: absolute;
+        background: rgba(255, 255, 255, 0.3);
+        border-radius: 50%;
+        animation: bubble 3s ease-out forwards;
+        pointer-events: none;
+    }
+
+    @keyframes bubble {
+        0% {
+            transform: translateY(0) scale(0);
+            opacity: 1;
+        }
+        100% {
+            transform: translateY(-200px) scale(1);
+            opacity: 0;
+        }
+    }
+
+    .controls {
+        position: absolute;
+        bottom: 20px;
+        left: 20px;
+        right: 20px;
+        text-align: center;
+    }
+
+    button {
+        background: rgba(255, 255, 255, 0.2);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        color: white;
+        padding: 10px 20px;
+        border-radius: 25px;
+        margin: 5px;
+        cursor: pointer;
+        transition: all 0.3s;
+        backdrop-filter: blur(10px);
+    }
+
+    button:hover {
+        background: rgba(255, 255, 255, 0.3);
+        transform: translateY(-2px);
+    }
+
+    .water-level {
+        position: absolute;
+        right: 10px;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 20px;
+        height: 200px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 10px;
+        overflow: hidden;
+    }
+
+    .water-indicator {
+        position: absolute;
+        bottom: 0;
+        width: 100%;
+        background: linear-gradient(to top, #3498db, #2980b9);
+        border-radius: 10px;
+        transition: height 0.3s ease;
+    }
+</style>
+```
+
+</head>
+<body>
+    <div class="container" id="container">
+        <div class="info-panel">
+            <div>🌊 Emulador de Agua con Física</div>
+            <div>Mueve tu teléfono para ver la física en acción</div>
+            <div class="debug-info" id="debug">
+                Gravedad: 0.5 | Flotabilidad: 0.3<br>
+                Giroscopio: Detectando...
+            </div>
+        </div>
+
+```
+    <div class="water" id="water"></div>
+    <div class="ball" id="ball"></div>
+    
+    <div class="water-level">
+        <div class="water-indicator" id="waterIndicator"></div>
+    </div>
+    
+    <div class="controls">
+        <button onclick="addWater()">💧 Agregar Agua</button>
+        <button onclick="removeWater()">🔥 Quitar Agua</button>
+        <button onclick="resetBall()">⚽ Reset Pelota</button>
+    </div>
+</div>
+
+<script>
+    class WaterPhysicsEmulator {
+        constructor() {
+            this.container = document.getElementById('container');
+            this.water = document.getElementById('water');
+            this.ball = document.getElementById('ball');
+            this.debug = document.getElementById('debug');
+            this.waterIndicator = document.getElementById('waterIndicator');
+            
+            // Propiedades físicas
+            this.gravity = 0.5;
+            this.buoyancy = 0.3;
+            this.friction = 0.98;
+            this.ballDensity = 0.6; // Menor que agua (1.0)
+            this.waterLevel = 0.7; // 70% de altura
+            
+            // Posición y velocidad de la pelota
+            this.ballX = 150;
+            this.ballY = 200;
+            this.ballVelX = 0;
+            this.ballVelY = 0;
+            
+            // Sensores del dispositivo
+            this.gyroX = 0;
+            this.gyroY = 0;
+            this.gyroZ = 0;
+            
+            // Configuración del contenedor
+            this.containerWidth = 350;
+            this.containerHeight = 500;
+            this.ballRadius = 25;
+            
+            this.init();
+        }
+        
+        init() {
+            this.setupDeviceMotion();
+            this.updateWaterLevel();
+            this.animate();
+            this.createBubbles();
+        }
+        
+        setupDeviceMotion() {
+            if (window.DeviceMotionEvent) {
+                // Para dispositivos iOS 13+
+                if (typeof DeviceMotionEvent.requestPermission === 'function') {
+                    DeviceMotionEvent.requestPermission()
+                        .then(response => {
+                            if (response == 'granted') {
+                                window.addEventListener('devicemotion', this.handleDeviceMotion.bind(this));
+                            }
+                        })
+                        .catch(console.error);
+                } else {
+                    // Para otros dispositivos
+                    window.addEventListener('devicemotion', this.handleDeviceMotion.bind(this));
+                }
+            } else {
+                // Fallback para escritorio - usar mouse
+                this.setupMouseControl();
+            }
+        }
+        
+        setupMouseControl() {
+            let isMouseDown = false;
+            this.container.addEventListener('mousedown', () => isMouseDown = true);
+            document.addEventListener('mouseup', () => isMouseDown = false);
+            
+            this.container.addEventListener('mousemove', (e) => {
+                if (isMouseDown) {
+                    const rect = this.container.getBoundingClientRect();
+                    const x = e.clientX - rect.left;
+                    const y = e.clientY - rect.top;
+                    
+                    this.gyroX = ((x - this.containerWidth / 2) / this.containerWidth) * 20;
+                    this.gyroY = ((y - this.containerHeight / 2) / this.containerHeight) * 20;
+                }
+            });
+        }
+        
+        handleDeviceMotion(event) {
+            // Obtener datos del acelerómetro y giroscopio
+            const acceleration = event.accelerationIncludingGravity;
+            const rotation = event.rotationRate;
+            
+            if (acceleration) {
+                this.gyroX = acceleration.x || 0;
+                this.gyroY = acceleration.y || 0;
+                this.gyroZ = acceleration.z || 0;
+            }
+            
+            // Actualizar debug info
+            this.updateDebugInfo();
+        }
+        
+        updateDebugInfo() {
+            this.debug.innerHTML = `
+                Gravedad: ${this.gravity.toFixed(2)} | Flotabilidad: ${this.buoyancy.toFixed(2)}<br>
+                Giro X: ${this.gyroX.toFixed(2)} | Giro Y: ${this.gyroY.toFixed(2)}<br>
+                Pelota: (${this.ballX.toFixed(0)}, ${this.ballY.toFixed(0)})
+            `;
+        }
+        
+        updatePhysics() {
+            // Aplicar gravedad del dispositivo
+            this.ballVelX += this.gyroX * 0.1;
+            this.ballVelY += this.gravity + (this.gyroY * 0.1);
+            
+            // Calcular si la pelota está en el agua
+            const waterTop = this.containerHeight * (1 - this.waterLevel);
+            const ballBottom = this.ballY + this.ballRadius;
+            const ballTop = this.ballY - this.ballRadius;
+            
+            if (ballBottom > waterTop) {
+                // La pelota está parcial o totalmente sumergida
+                const submersionRatio = Math.min(1, (ballBottom - waterTop) / (this.ballRadius * 2));
+                
+                // Aplicar flotabilidad
+                const buoyancyForce = this.buoyancy * submersionRatio * (1 - this.ballDensity);
+                this.ballVelY -= buoyancyForce;
+                
+                // Resistencia del agua
+                this.ballVelX *= 0.9;
+                this.ballVelY *= 0.9;
+                
+                // Crear burbujas ocasionalmente
+                if (Math.random() < 0.02) {
+                    this.createBubble(this.ballX, this.ballY);
+                }
+                
+                // Crear ondas
+                if (Math.abs(this.ballVelY) > 1) {
+                    this.createRipple(this.ballX, waterTop);
+                }
+            }
+            
+            // Aplicar fricción
+            this.ballVelX *= this.friction;
+            this.ballVelY *= this.friction;
+            
+            // Actualizar posición
+            this.ballX += this.ballVelX;
+            this.ballY += this.ballVelY;
+            
+            // Colisiones con paredes
+            if (this.ballX - this.ballRadius < 0) {
+                this.ballX = this.ballRadius;
+                this.ballVelX = -this.ballVelX * 0.7;
+            }
+            if (this.ballX + this.ballRadius > this.containerWidth) {
+                this.ballX = this.containerWidth - this.ballRadius;
+                this.ballVelX = -this.ballVelX * 0.7;
+            }
+            
+            // Colisión con fondo
+            if (this.ballY + this.ballRadius > this.containerHeight) {
+                this.ballY = this.containerHeight - this.ballRadius;
+                this.ballVelY = -this.ballVelY * 0.3;
+            }
+            
+            // Colisión con techo
+            if (this.ballY - this.ballRadius < 0) {
+                this.ballY = this.ballRadius;
+                this.ballVelY = -this.ballVelY * 0.3;
+            }
+        }
+        
+        createRipple(x, y) {
+            const ripple = document.createElement('div');
+            ripple.className = 'ripple';
+            ripple.style.left = (x - 25) + 'px';
+            ripple.style.top = (y - 25) + 'px';
+            this.container.appendChild(ripple);
+            
+            setTimeout(() => ripple.remove(), 1000);
+        }
+        
+        createBubble(x, y) {
+            const bubble = document.createElement('div');
+            bubble.className = 'bubble';
+            const size = Math.random() * 10 + 5;
+            bubble.style.width = size + 'px';
+            bubble.style.height = size + 'px';
+            bubble.style.left = (x + (Math.random() - 0.5) * 30) + 'px';
+            bubble.style.top = y + 'px';
+            this.container.appendChild(bubble);
+            
+            setTimeout(() => bubble.remove(), 3000);
+        }
+        
+        createBubbles() {
+            setInterval(() => {
+                if (Math.random() < 0.1) {
+                    const x = Math.random() * this.containerWidth;
+                    const y = this.containerHeight * (1 - this.waterLevel) + Math.random() * 100;
+                    this.createBubble(x, y);
+                }
+            }, 500);
+        }
+        
+        updateWaterLevel() {
+            this.water.style.height = (this.waterLevel * 100) + '%';
+            this.waterIndicator.style.height = (this.waterLevel * 100) + '%';
+            
+            // Efecto de inclinación del agua
+            const tiltX = this.gyroX * 0.5;
+            const tiltY = this.gyroY * 0.5;
+            this.water.style.transform = `rotate(${tiltX}deg) rotateX(${tiltY}deg)`;
+        }
+        
+        render() {
+            this.ball.style.left = (this.ballX - this.ballRadius) + 'px';
+            this.ball.style.top = (this.ballY - this.ballRadius) + 'px';
+            
+            // Efecto de rotación de la pelota
+            const rotation = (this.ballVelX * 5) % 360;
+            this.ball.style.transform = `rotate(${rotation}deg)`;
+            
+            this.updateWaterLevel();
+            this.updateDebugInfo();
+        }
+        
+        animate() {
+            this.updatePhysics();
+            this.render();
+            requestAnimationFrame(() => this.animate());
+        }
+    }
+    
+    // Funciones de control
+    function addWater() {
+        if (emulator.waterLevel < 0.9) {
+            emulator.waterLevel += 0.1;
+        }
+    }
+    
+    function removeWater() {
+        if (emulator.waterLevel > 0.2) {
+            emulator.waterLevel -= 0.1;
+        }
+    }
+    
+    function resetBall() {
+        emulator.ballX = 150;
+        emulator.ballY = 100;
+        emulator.ballVelX = 0;
+        emulator.ballVelY = 0;
+    }
+    
+    // Inicializar el emulador
+    const emulator = new WaterPhysicsEmulator();
+    
+    // Agregar soporte para táctil
+    let touchStartX, touchStartY;
+    
+    document.addEventListener('touchstart', (e) => {
+        touchStartX = e.touches[0].clientX;
+        touchStartY = e.touches[0].clientY;
+    });
+    
+    document.addEventListener('touchmove', (e) => {
+        e.preventDefault();
+        const touchX = e.touches[0].clientX;
+        const touchY = e.touches[0].clientY;
+        
+        const deltaX = touchX - touchStartX;
+        const deltaY = touchY - touchStartY;
+        
+        emulator.gyroX = deltaX * 0.1;
+        emulator.gyroY = deltaY * 0.1;
+    });
+    
+    // Solicitar permisos para iOS
+    if (window.DeviceMotionEvent && typeof DeviceMotionEvent.requestPermission === 'function') {
+        document.addEventListener('click', () => {
+            DeviceMotionEvent.requestPermission()
+                .then(response => {
+                    if (response === 'granted') {
+                        console.log('Permisos de movimiento concedidos');
+                    }
+                })
+                .catch(console.error);
+        }, { once: true });
+    }
+</script>
+```
+
+</body>
+</html>
