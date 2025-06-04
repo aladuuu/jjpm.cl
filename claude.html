@@ -126,6 +126,16 @@
         z-index: 100;
     }
 
+    .touch-area {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        z-index: 5;
+        cursor: pointer;
+    }
+
     .debug-info {
         margin-top: 10px;
         font-size: 10px;
@@ -225,14 +235,16 @@
     <div class="container" id="container">
         <div class="info-panel">
             <div>🌊 Emulador de Agua con Física</div>
-            <div>Mueve tu teléfono para ver la física en acción</div>
+            <div>👆 Toca y desliza para interactuar con el agua</div>
             <div class="debug-info" id="debug">
                 Gravedad: 0.5 | Flotabilidad: 0.3<br>
-                Giroscopio: Detectando...
+                Toque: Listo para interactuar
             </div>
         </div>
 
 ```
+    <div class="touch-area" id="touchArea"></div>
+    
     <div class="water" id="water"></div>
     <div class="ball" id="ball"></div>
     
@@ -255,6 +267,7 @@
             this.ball = document.getElementById('ball');
             this.debug = document.getElementById('debug');
             this.waterIndicator = document.getElementById('waterIndicator');
+            this.touchArea = document.getElementById('touchArea');
             
             // Propiedades físicas
             this.gravity = 0.5;
@@ -269,10 +282,16 @@
             this.ballVelX = 0;
             this.ballVelY = 0;
             
-            // Sensores del dispositivo
-            this.gyroX = 0;
-            this.gyroY = 0;
-            this.gyroZ = 0;
+            // Variables de interacción táctil
+            this.touchStartX = 0;
+            this.touchStartY = 0;
+            this.touchCurrentX = 0;
+            this.touchCurrentY = 0;
+            this.isTouching = false;
+            this.swipeForceX = 0;
+            this.swipeForceY = 0;
+            this.tapCount = 0;
+            this.lastTapTime = 0;
             
             // Configuración del contenedor
             this.containerWidth = 350;
@@ -283,77 +302,237 @@
         }
         
         init() {
-            this.setupDeviceMotion();
+            this.setupTouchControls();
             this.updateWaterLevel();
             this.animate();
             this.createBubbles();
         }
         
-        setupDeviceMotion() {
-            if (window.DeviceMotionEvent) {
-                // Para dispositivos iOS 13+
-                if (typeof DeviceMotionEvent.requestPermission === 'function') {
-                    DeviceMotionEvent.requestPermission()
-                        .then(response => {
-                            if (response == 'granted') {
-                                window.addEventListener('devicemotion', this.handleDeviceMotion.bind(this));
-                            }
-                        })
-                        .catch(console.error);
-                } else {
-                    // Para otros dispositivos
-                    window.addEventListener('devicemotion', this.handleDeviceMotion.bind(this));
+        setupTouchControls() {
+            // Touch events para móvil
+            this.touchArea.addEventListener('touchstart', this.handleTouchStart.bind(this), { passive: false });
+            this.touchArea.addEventListener('touchmove', this.handleTouchMove.bind(this), { passive: false });
+            this.touchArea.addEventListener('touchend', this.handleTouchEnd.bind(this), { passive: false });
+            
+            // Mouse events para desktop
+            this.touchArea.addEventListener('mousedown', this.handleMouseDown.bind(this));
+            this.touchArea.addEventListener('mousemove', this.handleMouseMove.bind(this));
+            this.touchArea.addEventListener('mouseup', this.handleMouseUp.bind(this));
+            this.touchArea.addEventListener('mouseleave', this.handleMouseUp.bind(this));
+            
+            // Prevenir comportamientos por defecto
+            this.touchArea.addEventListener('contextmenu', (e) => e.preventDefault());
+        }
+        
+        handleTouchStart(e) {
+            e.preventDefault();
+            const touch = e.touches[0];
+            this.startTouch(touch.clientX, touch.clientY);
+        }
+        
+        handleTouchMove(e) {
+            e.preventDefault();
+            if (!this.isTouching) return;
+            const touch = e.touches[0];
+            this.moveTouch(touch.clientX, touch.clientY);
+        }
+        
+        handleTouchEnd(e) {
+            e.preventDefault();
+            this.endTouch();
+        }
+        
+        handleMouseDown(e) {
+            this.startTouch(e.clientX, e.clientY);
+        }
+        
+        handleMouseMove(e) {
+            if (!this.isTouching) return;
+            this.moveTouch(e.clientX, e.clientY);
+        }
+        
+        handleMouseUp() {
+            this.endTouch();
+        }
+        
+        startTouch(clientX, clientY) {
+            const rect = this.container.getBoundingClientRect();
+            this.touchStartX = clientX - rect.left;
+            this.touchStartY = clientY - rect.top;
+            this.touchCurrentX = this.touchStartX;
+            this.touchCurrentY = this.touchStartY;
+            this.isTouching = true;
+            
+            // Detectar tap en la pelota
+            const ballDistance = Math.sqrt(
+                Math.pow(this.touchStartX - this.ballX, 2) + 
+                Math.pow(this.touchStartY - this.ballY, 2)
+            );
+            
+            if (ballDistance < this.ballRadius + 10) {
+                this.handleBallTap();
+            }
+            
+            // Detectar double tap
+            const currentTime = Date.now();
+            if (currentTime - this.lastTapTime < 300) {
+                this.handleDoubleTap();
+            }
+            this.lastTapTime = currentTime;
+        }
+        
+        moveTouch(clientX, clientY) {
+            const rect = this.container.getBoundingClientRect();
+            this.touchCurrentX = clientX - rect.left;
+            this.touchCurrentY = clientY - rect.top;
+            
+            // Calcular velocidad de swipe
+            const deltaX = this.touchCurrentX - this.touchStartX;
+            const deltaY = this.touchCurrentY - this.touchStartY;
+            
+            // Aplicar fuerza de swipe al agua y pelota
+            this.swipeForceX = deltaX * 0.1;
+            this.swipeForceY = deltaY * 0.1;
+            
+            // Crear ondas donde se toca
+            if (Math.abs(deltaX) > 5 || Math.abs(deltaY) > 5) {
+                this.createRipple(this.touchCurrentX, this.touchCurrentY);
+                
+                // Si se toca en el agua, crear burbujas
+                const waterTop = this.containerHeight * (1 - this.waterLevel);
+                if (this.touchCurrentY > waterTop) {
+                    if (Math.random() < 0.3) {
+                        this.createBubble(this.touchCurrentX, this.touchCurrentY);
+                    }
                 }
+            }
+        }
+        
+        endTouch() {
+            if (!this.isTouching) return;
+            
+            const deltaX = this.touchCurrentX - this.touchStartX;
+            const deltaY = this.touchCurrentY - this.touchStartY;
+            const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+            
+            // Si es un swipe (movimiento > 30px)
+            if (distance > 30) {
+                this.handleSwipe(deltaX, deltaY, distance);
             } else {
-                // Fallback para escritorio - usar mouse
-                this.setupMouseControl();
+                // Si es un tap simple
+                this.handleTap(this.touchCurrentX, this.touchCurrentY);
             }
+            
+            this.isTouching = false;
+            this.swipeForceX *= 0.5;
+            this.swipeForceY *= 0.5;
         }
         
-        setupMouseControl() {
-            let isMouseDown = false;
-            this.container.addEventListener('mousedown', () => isMouseDown = true);
-            document.addEventListener('mouseup', () => isMouseDown = false);
+        handleTap(x, y) {
+            const waterTop = this.containerHeight * (1 - this.waterLevel);
             
-            this.container.addEventListener('mousemove', (e) => {
-                if (isMouseDown) {
-                    const rect = this.container.getBoundingClientRect();
-                    const x = e.clientX - rect.left;
-                    const y = e.clientY - rect.top;
-                    
-                    this.gyroX = ((x - this.containerWidth / 2) / this.containerWidth) * 20;
-                    this.gyroY = ((y - this.containerHeight / 2) / this.containerHeight) * 20;
+            // Crear ondas en el punto de tap
+            this.createRipple(x, y);
+            
+            // Si se toca en el agua, crear burbujas
+            if (y > waterTop) {
+                for (let i = 0; i < 3; i++) {
+                    setTimeout(() => {
+                        this.createBubble(x + (Math.random() - 0.5) * 40, y);
+                    }, i * 100);
                 }
-            });
-        }
-        
-        handleDeviceMotion(event) {
-            // Obtener datos del acelerómetro y giroscopio
-            const acceleration = event.accelerationIncludingGravity;
-            const rotation = event.rotationRate;
-            
-            if (acceleration) {
-                this.gyroX = acceleration.x || 0;
-                this.gyroY = acceleration.y || 0;
-                this.gyroZ = acceleration.z || 0;
             }
             
-            // Actualizar debug info
-            this.updateDebugInfo();
+            // Aplicar fuerza radial desde el punto de tap
+            const ballDist = Math.sqrt(Math.pow(x - this.ballX, 2) + Math.pow(y - this.ballY, 2));
+            if (ballDist < 100) {
+                const force = (100 - ballDist) / 100;
+                const angle = Math.atan2(this.ballY - y, this.ballX - x);
+                this.ballVelX += Math.cos(angle) * force * 3;
+                this.ballVelY += Math.sin(angle) * force * 3;
+            }
+        }
+        
+        handleSwipe(deltaX, deltaY, distance) {
+            const force = Math.min(distance / 50, 3);
+            
+            // Aplicar fuerza de swipe a la pelota si está cerca
+            const ballDist = Math.sqrt(
+                Math.pow(this.touchStartX - this.ballX, 2) + 
+                Math.pow(this.touchStartY - this.ballY, 2)
+            );
+            
+            if (ballDist < 80) {
+                this.ballVelX += (deltaX / distance) * force * 2;
+                this.ballVelY += (deltaY / distance) * force * 2;
+            }
+            
+            // Crear múltiples ondas a lo largo del swipe
+            const steps = Math.floor(distance / 20);
+            for (let i = 0; i <= steps; i++) {
+                const t = i / steps;
+                const x = this.touchStartX + deltaX * t;
+                const y = this.touchStartY + deltaY * t;
+                setTimeout(() => {
+                    this.createRipple(x, y);
+                }, i * 50);
+            }
+        }
+        
+        handleBallTap() {
+            // Hacer que la pelota salte
+            this.ballVelY -= 5;
+            this.ballVelX += (Math.random() - 0.5) * 2;
+            
+            // Crear burbujas alrededor de la pelota
+            for (let i = 0; i < 5; i++) {
+                setTimeout(() => {
+                    this.createBubble(
+                        this.ballX + (Math.random() - 0.5) * 60,
+                        this.ballY + (Math.random() - 0.5) * 60
+                    );
+                }, i * 100);
+            }
+        }
+        
+        handleDoubleTap() {
+            // Crear una explosión de burbujas
+            for (let i = 0; i < 10; i++) {
+                setTimeout(() => {
+                    this.createBubble(
+                        this.touchCurrentX + (Math.random() - 0.5) * 80,
+                        this.touchCurrentY + (Math.random() - 0.5) * 80
+                    );
+                }, i * 50);
+            }
+            
+            // Crear ondas concéntricas
+            for (let i = 1; i <= 3; i++) {
+                setTimeout(() => {
+                    this.createRipple(this.touchCurrentX, this.touchCurrentY);
+                }, i * 200);
+            }
         }
         
         updateDebugInfo() {
             this.debug.innerHTML = `
                 Gravedad: ${this.gravity.toFixed(2)} | Flotabilidad: ${this.buoyancy.toFixed(2)}<br>
-                Giro X: ${this.gyroX.toFixed(2)} | Giro Y: ${this.gyroY.toFixed(2)}<br>
-                Pelota: (${this.ballX.toFixed(0)}, ${this.ballY.toFixed(0)})
+                Toque: ${this.isTouching ? 'Activo' : 'Inactivo'} | Pelota: (${this.ballX.toFixed(0)}, ${this.ballY.toFixed(0)})<br>
+                Swipe: X:${this.swipeForceX.toFixed(1)} Y:${this.swipeForceY.toFixed(1)}
             `;
         }
         
         updatePhysics() {
-            // Aplicar gravedad del dispositivo
-            this.ballVelX += this.gyroX * 0.1;
-            this.ballVelY += this.gravity + (this.gyroY * 0.1);
+            // Aplicar fuerzas de swipe
+            this.ballVelX += this.swipeForceX * 0.1;
+            this.ballVelY += this.swipeForceY * 0.1;
+            
+            // Reducir gradualmente las fuerzas de swipe
+            this.swipeForceX *= 0.95;
+            this.swipeForceY *= 0.95;
+            
+            // Aplicar gravedad normal
+            this.ballVelY += this.gravity;
             
             // Calcular si la pelota está en el agua
             const waterTop = this.containerHeight * (1 - this.waterLevel);
@@ -451,9 +630,9 @@
             this.water.style.height = (this.waterLevel * 100) + '%';
             this.waterIndicator.style.height = (this.waterLevel * 100) + '%';
             
-            // Efecto de inclinación del agua
-            const tiltX = this.gyroX * 0.5;
-            const tiltY = this.gyroY * 0.5;
+            // Efecto de inclinación del agua basado en las fuerzas de swipe
+            const tiltX = this.swipeForceX * 0.3;
+            const tiltY = this.swipeForceY * 0.3;
             this.water.style.transform = `rotate(${tiltX}deg) rotateX(${tiltY}deg)`;
         }
         
@@ -498,39 +677,6 @@
     
     // Inicializar el emulador
     const emulator = new WaterPhysicsEmulator();
-    
-    // Agregar soporte para táctil
-    let touchStartX, touchStartY;
-    
-    document.addEventListener('touchstart', (e) => {
-        touchStartX = e.touches[0].clientX;
-        touchStartY = e.touches[0].clientY;
-    });
-    
-    document.addEventListener('touchmove', (e) => {
-        e.preventDefault();
-        const touchX = e.touches[0].clientX;
-        const touchY = e.touches[0].clientY;
-        
-        const deltaX = touchX - touchStartX;
-        const deltaY = touchY - touchStartY;
-        
-        emulator.gyroX = deltaX * 0.1;
-        emulator.gyroY = deltaY * 0.1;
-    });
-    
-    // Solicitar permisos para iOS
-    if (window.DeviceMotionEvent && typeof DeviceMotionEvent.requestPermission === 'function') {
-        document.addEventListener('click', () => {
-            DeviceMotionEvent.requestPermission()
-                .then(response => {
-                    if (response === 'granted') {
-                        console.log('Permisos de movimiento concedidos');
-                    }
-                })
-                .catch(console.error);
-        }, { once: true });
-    }
 </script>
 ```
 
