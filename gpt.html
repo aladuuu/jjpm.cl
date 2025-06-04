@@ -4,8 +4,7 @@
   <meta charset="UTF-8">
   <title>Simulador de agua + flotabilidad</title>
   <style>
-    /* ——— Estética ——— */
-    :root {color-scheme: dark;}
+    :root { color-scheme: dark; }
     body{
       margin:0;display:flex;justify-content:center;align-items:center;
       height:100svh;background:#20242b;font-family:system-ui,sans-serif;
@@ -15,8 +14,8 @@
     }
     #hint{position:fixed;inset:auto 1rem 1rem auto;color:#aaa;font-size:.8rem}
   </style>
-  <!-- Matter.js desde CDN -->
-  <script src="https://cdn.jsdelivr.net/npm/matter-js@0.20.1/build/matter.min.js"></script>
+  <!-- Matter.js (última versión disponible) -->
+  <script src="https://cdn.jsdelivr.net/npm/matter-js@0.20.0/build/matter.min.js"></script>
 </head>
 <body>
   <canvas id="scene" width="380" height="600"></canvas>
@@ -24,15 +23,14 @@
 
 <script>
 (() => {
-  /* ───── Setup básico ───── */
-  const { Engine, Render, Runner, World, Bodies, Body, Events, Vector } = Matter;
+  const { Engine, Render, Runner, World, Bodies, Body, Events } = Matter;
   const canvas   = document.querySelector('#scene');
   const engine   = Engine.create();
   const world    = engine.world;
-  const waterY   = canvas.height * 0.55;          // Línea de flotación
-  engine.gravity.scale = 0.0012;                  // Suave para la demo
+  const waterY   = canvas.height * 0.55;
+  engine.gravity.scale = 0.0012;
 
-  /* ───── Render ───── */
+  /* Render */
   const render = Render.create({
     canvas,
     engine,
@@ -44,16 +42,16 @@
   Render.run(render);
   Runner.run(Runner.create(), engine);
 
-  /* ───── Paredes contenedor ───── */
+  /* Paredes */
   const wallOpts = { isStatic:true, restitution:0.3 };
   World.add(world, [
-    Bodies.rectangle(canvas.width/2, -20, canvas.width, 40, wallOpts),                // Techo
-    Bodies.rectangle(canvas.width/2, canvas.height+20, canvas.width, 40, wallOpts),   // Suelo
-    Bodies.rectangle(-20, canvas.height/2, 40, canvas.height, wallOpts),              // Izq
-    Bodies.rectangle(canvas.width+20, canvas.height/2, 40, canvas.height, wallOpts)   // Dcha
+    Bodies.rectangle(canvas.width/2, -20, canvas.width, 40, wallOpts),
+    Bodies.rectangle(canvas.width/2, canvas.height+20, canvas.width, 40, wallOpts),
+    Bodies.rectangle(-20, canvas.height/2, 40, canvas.height, wallOpts),
+    Bodies.rectangle(canvas.width+20, canvas.height/2, 40, canvas.height, wallOpts)
   ]);
 
-  /* ───── Pelota flotante ───── */
+  /* Pelota flotante */
   const radius = 40;
   const ball = Bodies.circle(canvas.width/2, waterY - radius, radius, {
     restitution:0.2, density:0.0005, frictionAir:0.005,
@@ -61,52 +59,48 @@
   });
   World.add(world, ball);
 
-  /* ───── Dibujo del agua ───── */
+  /* Agua */
   const ctx = render.context;
   Events.on(render, 'afterRender', () => {
-    ctx.fillStyle = 'rgba(30,136,229,0.35)';      // Agua semitransparente
+    ctx.fillStyle = 'rgba(30,136,229,0.35)';
     ctx.fillRect(0, waterY, canvas.width, canvas.height - waterY);
   });
 
-  /* ───── Buoyancy casera ───── */
+  /* Flotabilidad */
   Events.on(engine, 'beforeUpdate', () => {
-    const depth = (ball.position.y + radius) - waterY;   // >0 si está sumergida
+    const depth = (ball.position.y + radius) - waterY;
     if (depth > 0) {
-      const submersion = Math.min(depth / (2*radius), 1);          // 0-1
-      const buoyant = engine.gravity.scale * engine.gravity.y *    // misma magnitud
-                      -ball.mass * submersion;                     // pero hacia arriba
+      const submersion = Math.min(depth / (2*radius), 1);
+      const buoyant = -engine.gravity.y * ball.mass * submersion * engine.gravity.scale;
       Body.applyForce(ball, ball.position, { x:0, y:buoyant });
     }
   });
 
-  /* ───── Control por giroscopio ───── */
-  function setGravityFromTilt(evt){
+  /* Giroscopio */
+  function setGravity(evt){
     const g = engine.gravity;
-    // beta = front/back (–180..180) | gamma = left/right (–90..90)
     if (evt.beta != null && evt.gamma != null){
-      g.x =  Math.sin(evt.gamma  * Math.PI/180);
-      g.y =  Math.sin(evt.beta   * Math.PI/180);
+      g.x =  Math.sin(evt.gamma * Math.PI/180);
+      g.y =  Math.sin(evt.beta  * Math.PI/180);
     }
   }
   if (typeof DeviceOrientationEvent !== 'undefined'){
-    // iOS16+ pide permiso explícito
     if (DeviceOrientationEvent.requestPermission){
       DeviceOrientationEvent.requestPermission()
-        .then(p => p === 'granted' && window.addEventListener('deviceorientation', setGravityFromTilt))
+        .then(p => p === 'granted' && addEventListener('deviceorientation', setGravity))
         .catch(console.warn);
     }else{
-      window.addEventListener('deviceorientation', setGravityFromTilt);
+      addEventListener('deviceorientation', setGravity);
     }
   }
 
-  /* ───── Fallback: flechas (↔ / ↕) ───── */
-  window.addEventListener('keydown', e=>{
-    const g = engine.gravity;
-    const step = .3;
-    if (e.key === 'ArrowLeft' ) g.x = Math.max(g.x - step, -1);
-    if (e.key === 'ArrowRight') g.x = Math.min(g.x + step,  1);
-    if (e.key === 'ArrowUp'   ) g.y = Math.max(g.y - step, -1);
-    if (e.key === 'ArrowDown' ) g.y = Math.min(g.y + step,  1);
+  /* Fallback teclado */
+  addEventListener('keydown', e=>{
+    const g = engine.gravity, step=.3;
+    if (e.key==='ArrowLeft')  g.x = Math.max(g.x-step,-1);
+    if (e.key==='ArrowRight') g.x = Math.min(g.x+step, 1);
+    if (e.key==='ArrowUp')    g.y = Math.max(g.y-step,-1);
+    if (e.key==='ArrowDown')  g.y = Math.min(g.y+step, 1);
   });
 })();
 </script>
