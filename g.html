@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-T">
+    <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Emulador de Agua con Giroscopio</title>
+    <title>Juego de Agua con Toques y Niveles</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         body {
@@ -16,7 +16,7 @@
             margin: 0;
             background-color: #f0f4f8; /* Gris azulado claro */
             color: #1e293b; /* Gris oscuro */
-            overflow: hidden; /* Evitar scrollbars por el canvas */
+            overflow: hidden;
         }
         #gameContainer {
             display: flex;
@@ -26,15 +26,18 @@
             padding: 20px;
             border-radius: 12px;
             box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            max-width: 90%;
+            width: auto; /* Allow shrinking */
         }
         canvas {
-            background-color: #e0f2fe; /* Azul cielo muy claro para el fondo del canvas */
+            background-color: #e0f2fe;
             border-radius: 8px;
-            border: 2px solid #93c5fd; /* Borde azul claro */
-            display: block; /* Evita espacio extra debajo del canvas */
+            border: 2px solid #93c5fd;
+            display: block;
+            max-width: 100%;
         }
-        #permissionButton {
-            background-color: #3b82f6; /* Azul primario */
+        #controlButton { /* Renamed from permissionButton */
+            background-color: #3b82f6;
             color: white;
             padding: 12px 24px;
             border: none;
@@ -42,44 +45,53 @@
             font-size: 16px;
             cursor: pointer;
             transition: background-color 0.3s ease;
-            margin-bottom: 15px;
+            margin-bottom: 10px;
             box-shadow: 0 4px 14px rgba(59, 130, 246, 0.3);
         }
-        #permissionButton:hover {
-            background-color: #2563eb; /* Azul más oscuro */
+        #controlButton:hover {
+            background-color: #2563eb;
         }
-        #permissionButton:disabled {
-            background-color: #9ca3af; /* Gris para deshabilitado */
+        #controlButton:disabled {
+            background-color: #9ca3af;
             cursor: not-allowed;
         }
         .info-text {
             font-size: 14px;
-            color: #475569; /* Gris medio */
-            margin-top: 10px;
+            color: #475569;
+            margin-top: 5px;
             text-align: center;
+        }
+        #levelInfo {
+            font-size: 16px;
+            font-weight: bold;
+            color: #334155; /* Gris más oscuro */
+            margin-bottom: 10px;
         }
          #messageBox {
             position: fixed;
             top: 20px;
             left: 50%;
             transform: translateX(-50%);
-            background-color: #ef4444; /* Rojo para error */
+            background-color: #10b981; /* Verde para éxito por defecto */
             color: white;
-            padding: 10px 20px;
-            border-radius: 6px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            padding: 12px 25px;
+            border-radius: 8px;
+            box-shadow: 0 3px 15px rgba(0,0,0,0.15);
             z-index: 1000;
-            display: none; /* Oculto por defecto */
-            font-size: 14px;
+            display: none;
+            font-size: 15px;
+            text-align: center;
+            max-width: 90%;
         }
     </style>
 </head>
 <body>
     <div id="gameContainer">
-        <h1 class="text-2xl font-bold mb-4 text-center text-slate-700">Simulador de Agua</h1>
-        <button id="permissionButton">Iniciar Simulación</button>
+        <h1 class="text-2xl font-bold mb-2 text-center text-slate-700">Juego de la Pelota Flotante</h1>
+        <p id="levelInfo" class="info-text">Nivel: 1</p>
+        <button id="controlButton">Iniciar Juego</button>
         <canvas id="waterCanvas"></canvas>
-        <p class="info-text">Inclina tu teléfono para mover la pelota.</p>
+        <p id="instructionsText" class="info-text mt-3">Toca la pantalla para empujar la pelota.</p>
     </div>
     <div id="messageBox"></div>
 
@@ -87,202 +99,197 @@
         // --- Elementos del DOM ---
         const canvas = document.getElementById('waterCanvas');
         const ctx = canvas.getContext('2d');
-        const permissionButton = document.getElementById('permissionButton');
+        const controlButton = document.getElementById('controlButton');
         const messageBox = document.getElementById('messageBox');
+        const levelInfoText = document.getElementById('levelInfo');
+        const instructionsText = document.getElementById('instructionsText');
 
         // --- Configuración del Canvas ---
-        // Usar un tamaño fijo menor para mejor visualización inicial y en dispositivos diversos
-        // Se ajustará para ser responsivo pero manteniendo un aspect ratio
-        const baseCanvasWidth = 300;
-        const baseCanvasHeight = 400;
+        const baseCanvasWidth = 320; // Un poco más ancho para jugabilidad
+        const baseCanvasHeight = 420;
         canvas.width = baseCanvasWidth;
         canvas.height = baseCanvasHeight;
         
         // --- Constantes de Física y Simulación ---
-        const BALL_RADIUS = 15; // Radio de la pelota en píxeles
-        const WATER_DENSITY_RELATIVE = 1.0; // Densidad del agua (referencia)
-        const BALL_DENSITY_RELATIVE = 0.6;  // Densidad de la pelota (0.6 = flota bien)
-
-        // Calculamos densidades "absolutas" en unidades de píxeles (arbitrarias pero consistentes)
-        // Estos valores se ajustan para que la física se sienta bien en la escala de píxeles.
-        const PIXEL_DENSITY_SCALE = 0.0001; // Factor de escala para densidades
+        const BALL_RADIUS = 12; // Un poco más pequeña
+        const WATER_DENSITY_RELATIVE = 1.0;
+        const BALL_DENSITY_RELATIVE = 0.55; // Ligeramente más flotante
+        const PIXEL_DENSITY_SCALE = 0.0001; 
         const WATER_DENSITY_PIXELS = WATER_DENSITY_RELATIVE * PIXEL_DENSITY_SCALE;
         const BALL_DENSITY_PIXELS = BALL_DENSITY_RELATIVE * PIXEL_DENSITY_SCALE;
-        
         const BALL_VOLUME = (4/3) * Math.PI * Math.pow(BALL_RADIUS, 3);
         const BALL_MASS = BALL_VOLUME * BALL_DENSITY_PIXELS;
-        
-        const WATER_LEVEL_RATIO = 0.6; // El agua llena el 60% inferior del contenedor
+        const WATER_LEVEL_RATIO = 0.65; // Un poco más de agua
         let waterSurfaceY = canvas.height * (1 - WATER_LEVEL_RATIO);
-
-        const DRAG_COEFFICIENT = 0.05; // Coeficiente de arrastre (resistencia del agua)
-        const TILT_SENSITIVITY = 1.0;  // Sensibilidad al movimiento del giroscopio
-        const RESTITUTION = 0.5;       // Elasticidad en las colisiones (0 a 1)
+        
+        const DRAG_COEFFICIENT = 0.08; // Un poco más de arrastre para control
+        const RESTITUTION = 0.4;      
+        const STATIC_GRAVITY = 9.8 * 25; // Gravedad constante hacia abajo (ajustada para la escala de píxeles)
+        const TAP_IMPULSE_STRENGTH = BALL_MASS * 150; // Impulso más fuerte para mover la pelota
 
         // --- Estado de la Pelota ---
         let ball = {
             x: canvas.width / 2,
-            y: canvas.height / 4, // Comienza arriba, caerá en el agua
-            vx: 0, // velocidad en x
-            vy: 0, // velocidad en y
+            y: canvas.height / 4,
+            vx: 0, vy: 0,
             radius: BALL_RADIUS,
-            mass: BALL_MASS
+            mass: BALL_MASS,
+            inHole: false
         };
 
-        // --- Datos del Giroscopio ---
-        let deviceMotion = {
-            axg: 0, // aceleración incluyendo gravedad en x
-            ayg: 0  // aceleración incluyendo gravedad en y (principal componente gravitatorio)
-        };
-        let motionListenerActive = false;
+        // --- Estado del Juego ---
         let simulationRunning = false;
         let lastTimestamp = 0;
+        let isTouchDevice = false;
+        let currentLevelIndex = 0;
+        let levels = []; // Se definirá en initializeGameAssets
 
         // --- Funciones Auxiliares ---
-        function showMessage(text, duration = 3000, isError = false) {
-            messageBox.textContent = text;
-            messageBox.style.backgroundColor = isError ? '#ef4444' : '#3b82f6'; // Rojo para error, azul para info
+        function showUserMessage(text, duration = 3000, type = 'success') { // type: 'success', 'error', 'info'
+            messageBox.innerHTML = text;
+            if (type === 'success') messageBox.style.backgroundColor = '#10b981'; // Verde
+            else if (type === 'error') messageBox.style.backgroundColor = '#ef4444'; // Rojo
+            else messageBox.style.backgroundColor = '#3b82f6'; // Azul (info)
+            
             messageBox.style.display = 'block';
-            setTimeout(() => {
+            clearTimeout(messageBox.timeoutId);
+            messageBox.timeoutId = setTimeout(() => {
                 messageBox.style.display = 'none';
             }, duration);
         }
 
-        // --- Lógica de Permisos y Eventos ---
-        permissionButton.addEventListener('click', requestDeviceMotionPermission);
+        function initializeGameAssets() {
+            // Definir niveles con posiciones relativas al canvas actual
+            levels = [
+                { // Nivel 1
+                    ballStart: { x: canvas.width / 2, y: canvas.height / 5 },
+                    hole: { x: canvas.width / 2, y: canvas.height * 0.8, radius: BALL_RADIUS + 6 }
+                },
+                { // Nivel 2
+                    ballStart: { x: canvas.width / 4, y: canvas.height / 5 },
+                    hole: { x: canvas.width * 0.75, y: canvas.height * 0.85, radius: BALL_RADIUS + 5 }
+                },
+                { // Nivel 3
+                    ballStart: { x: canvas.width * 0.75, y: waterSurfaceY - BALL_RADIUS * 3 }, // Empieza en el agua
+                    hole: { x: canvas.width / 4, y: canvas.height * 0.2, radius: BALL_RADIUS + 7 } // Agujero arriba
+                },
+                { // Nivel 4
+                    ballStart: { x: canvas.width / 2, y: canvas.height / 6 },
+                    hole: { x: canvas.width / 2, y: canvas.height * 0.5, radius: BALL_RADIUS + 4 } // Agujero en el medio
+                },
+                 { // Nivel 5
+                    ballStart: { x: canvas.width * 0.15, y: canvas.height * 0.2 },
+                    hole: { x: canvas.width * 0.85, y: canvas.height * 0.8, radius: BALL_RADIUS + 5 }
+                }
+            ];
+        }
 
-        function requestDeviceMotionPermission() {
-            if (typeof DeviceMotionEvent !== 'undefined' && typeof DeviceMotionEvent.requestPermission === 'function') {
-                DeviceMotionEvent.requestPermission()
-                    .then(permissionState => {
-                        if (permissionState === 'granted') {
-                            window.addEventListener('devicemotion', handleMotionEvent);
-                            motionListenerActive = true;
-                            permissionButton.disabled = true;
-                            permissionButton.textContent = "Simulación Activa";
-                            showMessage("Permiso concedido. ¡Inclina tu teléfono!", 3000);
-                            if (!simulationRunning) {
-                                simulationRunning = true;
-                                lastTimestamp = performance.now();
-                                gameLoop();
-                            }
-                        } else {
-                            showMessage('Permiso denegado. La simulación no funcionará con giroscopio.', 5000, true);
-                            // Iniciar simulación sin giroscopio (solo gravedad estática)
-                            deviceMotion.ayg = 9.8; // Gravedad estándar hacia abajo
-                            if (!simulationRunning) {
-                                simulationRunning = true;
-                                lastTimestamp = performance.now();
-                                gameLoop();
-                            }
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error solicitando permiso DeviceMotionEvent:', error);
-                        showMessage('Error al solicitar permisos. Intenta de nuevo o revisa la configuración de tu navegador.', 5000, true);
-                         // Iniciar simulación sin giroscopio
-                        deviceMotion.ayg = 9.8;
-                        if (!simulationRunning) {
-                            simulationRunning = true;
-                            lastTimestamp = performance.now();
-                            gameLoop();
-                        }
-                    });
-            } else {
-                // Para navegadores que no requieren permiso explícito o no soportan la API de permiso
-                // (ej. Android Chrome no necesita requestPermission)
-                window.addEventListener('devicemotion', handleMotionEvent);
-                motionListenerActive = true;
-                permissionButton.disabled = true;
-                permissionButton.textContent = "Simulación Activa";
-                showMessage("Intentando activar giroscopio (puede que no se requiera permiso explícito).", 3000);
-                if (!simulationRunning) {
-                    simulationRunning = true;
-                    lastTimestamp = performance.now();
-                    gameLoop();
-                }
-                 // Si no hay devicemotion, al menos que caiga por gravedad
-                if (!motionListenerActive && !simulationRunning) { // Asegurar que no se inicie dos veces
-                    deviceMotion.ayg = 9.8; // Gravedad estándar
-                    simulationRunning = true;
-                    lastTimestamp = performance.now();
-                    gameLoop();
-                }
+
+        function loadLevel(levelIndex) {
+            if (levelIndex >= levels.length) {
+                showUserMessage("¡Felicidades! ¡Has completado todos los niveles!", 5000, 'success');
+                simulationRunning = false;
+                controlButton.textContent = "Jugar de Nuevo";
+                controlButton.disabled = false;
+                currentLevelIndex = 0; // Reset para jugar de nuevo
+                return;
+            }
+            const level = levels[levelIndex];
+            ball.x = level.ballStart.x;
+            ball.y = level.ballStart.y;
+            ball.vx = 0;
+            ball.vy = 0;
+            ball.inHole = false;
+            levelInfoText.textContent = `Nivel: ${levelIndex + 1}`;
+            if (simulationRunning) draw(); // Redibujar si la simulación ya está activa
+        }
+        
+        // --- Lógica de Control del Juego ---
+        controlButton.addEventListener('click', toggleGame);
+
+        function toggleGame() {
+            if (!isTouchDevice) {
+                showUserMessage("Este juego requiere una pantalla táctil para interactuar.", 4000, 'error');
+                instructionsText.textContent = "Dispositivo no compatible.";
+                controlButton.disabled = true;
+                return;
+            }
+
+            if (simulationRunning) { // Detener el juego (aunque no es el flujo principal ahora)
+                simulationRunning = false;
+                controlButton.textContent = "Iniciar Juego";
+            } else { // Iniciar o reiniciar el juego
+                simulationRunning = true;
+                controlButton.textContent = "Pausar Juego (No implementado)"; // Pausa sería más complejo
+                controlButton.disabled = true; // Deshabilitar mientras juega, o cambiar a "Pausa"
+                
+                currentLevelIndex = 0; // Siempre empezar desde el nivel 1 al hacer clic en "Iniciar/Jugar de Nuevo"
+                initializeGameAssets(); // Asegurarse de que los niveles están definidos con el tamaño actual del canvas
+                loadLevel(currentLevelIndex);
+                
+                lastTimestamp = performance.now();
+                gameLoop();
             }
         }
 
-        function handleMotionEvent(event) {
-            if (event.accelerationIncludingGravity) {
-                // Multiplicamos por un factor para escalar la sensibilidad.
-                // Los valores de aceleración suelen estar en m/s^2.
-                // Los ajustamos para que se sientan bien en la escala de píxeles/frame.
-                // El factor 50 es un ejemplo, se puede ajustar.
-                const scaleFactor = 30; // Aumentado para más sensibilidad
-                deviceMotion.axg = (event.accelerationIncludingGravity.x || 0) * scaleFactor * TILT_SENSITIVITY;
-                deviceMotion.ayg = (event.accelerationIncludingGravity.y || 0) * scaleFactor * TILT_SENSITIVITY;
+        // --- Detección de Toque ---
+        function handleCanvasTap(event) {
+            if (!simulationRunning || ball.inHole) return;
 
-                // Si no hay datos de giroscopio (ej. en escritorio o si el permiso falla silenciosamente)
-                // y ayg es 0, aplicamos una gravedad por defecto para que la pelota caiga.
-                if (deviceMotion.axg === 0 && deviceMotion.ayg === 0 && !motionListenerActive) {
-                     deviceMotion.ayg = 9.8 * scaleFactor; // Gravedad por defecto si no hay datos
-                } else if (motionListenerActive && deviceMotion.ayg === 0 && deviceMotion.axg === 0) {
-                    // Si el listener está activo pero los valores son 0 (ej. teléfono plano sin moverse mucho)
-                    // Aún necesitamos la componente de gravedad. El acelerómetro da 0 si no hay movimiento NETO.
-                    // accelerationIncludingGravity SÍ incluye la gravedad.
-                    // Si y es 0, puede ser que el teléfono esté perfectamente horizontal.
-                    // En ese caso, la gravedad actúa en z. Para una vista 2D, esto significa que no hay "caída" en Y.
-                    // Esto es correcto. Si el teléfono está plano, la pelota no debería caer "hacia abajo" en la pantalla.
-                    // Pero si la simulación es lateral, necesitamos un "abajo".
-                    // Para simplificar, si ayg es muy bajo (cercano a 0) y el listener está activo,
-                    // asumimos que la gravedad principal es la que el dispositivo reporta en su eje Z,
-                    // pero como no la usamos directamente, la pelota podría parecer flotar si el teléfono está plano.
-                    // Por ahora, confiamos en que ayg capture la gravedad en el eje Y del dispositivo.
-                }
+            event.preventDefault(); // Prevenir comportamientos por defecto como scroll
+            
+            const rect = canvas.getBoundingClientRect();
+            const scaleX = canvas.width / rect.width;    // Relación de aspecto para escalado
+            const scaleY = canvas.height / rect.height;
+
+            // Soportar tanto touch como mouse click para facilitar pruebas
+            const clientX = event.touches ? event.touches[0].clientX : event.clientX;
+            const clientY = event.touches ? event.touches[0].clientY : event.clientY;
+            
+            const tapX = (clientX - rect.left) * scaleX;
+            const tapY = (clientY - rect.top) * scaleY;
+
+            const dx = ball.x - tapX;
+            const dy = ball.y - tapY;
+            const dist = Math.sqrt(dx * dx + dy * dy);
+
+            if (dist > 0) { // Evitar división por cero si se toca exactamente en el centro de la pelota
+                const impulseX = (dx / dist) * TAP_IMPULSE_STRENGTH / ball.mass;
+                const impulseY = (dy / dist) * TAP_IMPULSE_STRENGTH / ball.mass;
+                
+                ball.vx += impulseX;
+                ball.vy += impulseY;
             }
         }
+        canvas.addEventListener('touchstart', handleCanvasTap);
+        canvas.addEventListener('mousedown', handleCanvasTap); // Para pruebas en desktop
 
 
         // --- Lógica de Actualización de Física (Update) ---
         function update(dt) {
-            if (!simulationRunning) return;
-            if (dt > 0.1) dt = 0.1; // Cap max dt para evitar saltos grandes si hay lag
+            if (!simulationRunning || ball.inHole) return;
+            if (dt <= 0) return; 
+            if (dt > 0.1) dt = 0.1; // Cap dt
 
-            // 1. Calcular volumen sumergido y masa de agua desplazada
-            let submergedDepth = Math.max(0, (ball.y + ball.radius) - waterSurfaceY);
-            submergedDepth = Math.min(submergedDepth, 2 * ball.radius); // No puede ser más que el diámetro
-            
+            // 1. Calcular volumen sumergido y flotabilidad
             let V_submerged = 0;
-            if (submergedDepth > 0) {
-                // Fórmula del volumen de un casquete esférico: V = (PI * h^2 / 3) * (3*R - h)
-                // donde h es la altura del casquete, R es el radio de la esfera.
+            if (ball.y + ball.radius > waterSurfaceY) { // Si parte de la pelota está bajo el agua
+                let submergedDepth = Math.min(2 * ball.radius, (ball.y + ball.radius) - waterSurfaceY);
+                // Fórmula aproximada para el volumen de un casquete esférico
                 V_submerged = (Math.PI * Math.pow(submergedDepth, 2) / 3) * (3 * ball.radius - submergedDepth);
             }
             const mass_displaced_water = V_submerged * WATER_DENSITY_PIXELS;
 
             // 2. Calcular aceleraciones
-            // Aceleración debida al giroscopio/gravedad (ya escalada en handleMotionEvent)
-            let effective_g_y = deviceMotion.ayg;
-            let effective_g_x = deviceMotion.axg;
-
-            // Si no hay datos de giroscopio válidos, aplicar una gravedad por defecto
-            // Esto es un fallback si el listener no se activa o no da datos.
-            if (!motionListenerActive && effective_g_y === 0 && effective_g_x === 0) {
-                 effective_g_y = 9.8 * 30; // Gravedad estándar * factor de escala
-            }
-
-
-            // Aceleración neta en Y: (1 - masa_agua_desplazada / masa_pelota) * g_efectiva_y
-            // Esto combina la gravedad y la flotabilidad.
-            let acc_y = effective_g_y * (1 - mass_displaced_water / ball.mass);
-            
-            // Aceleración neta en X (solo por inclinación)
-            let acc_x = effective_g_x;
+            // Aceleración debida a la gravedad y flotabilidad
+            let acc_y = STATIC_GRAVITY * (1 - mass_displaced_water / ball.mass);
+            let acc_x = 0; // No hay fuerzas horizontales constantes por defecto
 
             // 3. Aplicar arrastre (resistencia del fluido)
-            // Solo aplicar arrastre si está significativamente sumergido
-            if (submergedDepth > ball.radius * 0.1) { // Si al menos un 10% del radio está sumergido
-                acc_x -= (DRAG_COEFFICIENT * ball.vx) / ball.mass;
-                acc_y -= (DRAG_COEFFICIENT * ball.vy) / ball.mass;
+            if (V_submerged > 0) { // Solo aplicar arrastre si está significativamente sumergido
+                // Arrastre proporcional al cuadrado de la velocidad para un efecto más realista
+                acc_x -= (DRAG_COEFFICIENT * ball.vx * Math.abs(ball.vx)) / ball.mass;
+                acc_y -= (DRAG_COEFFICIENT * ball.vy * Math.abs(ball.vy)) / ball.mass;
             }
             
             // 4. Actualizar velocidades
@@ -294,122 +301,151 @@
             ball.y += ball.vy * dt;
 
             // 6. Colisiones con las paredes del contenedor
-            // Colisión izquierda
-            if (ball.x - ball.radius < 0) {
-                ball.x = ball.radius;
-                ball.vx *= -RESTITUTION;
-            }
-            // Colisión derecha
-            if (ball.x + ball.radius > canvas.width) {
-                ball.x = canvas.width - ball.radius;
-                ball.vx *= -RESTITUTION;
-            }
-            // Colisión arriba
-            if (ball.y - ball.radius < 0) {
-                ball.y = ball.radius;
-                ball.vy *= -RESTITUTION;
-            }
-            // Colisión abajo (fondo del contenedor)
-            if (ball.y + ball.radius > canvas.height) {
-                ball.y = canvas.height - ball.radius;
-                ball.vy *= -RESTITUTION;
+            if (ball.x - ball.radius < 0) { ball.x = ball.radius; ball.vx *= -RESTITUTION; }
+            if (ball.x + ball.radius > canvas.width) { ball.x = canvas.width - ball.radius; ball.vx *= -RESTITUTION; }
+            if (ball.y - ball.radius < 0) { ball.y = ball.radius; ball.vy *= -RESTITUTION; }
+            if (ball.y + ball.radius > canvas.height) { ball.y = canvas.height - ball.radius; ball.vy *= -RESTITUTION; }
+
+            // 7. Comprobar si la pelota entra en el agujero
+            const currentHole = levels[currentLevelIndex].hole;
+            const dxHole = ball.x - currentHole.x;
+            const dyHole = ball.y - currentHole.y;
+            const distToHoleCenter = Math.sqrt(dxHole * dxHole + dyHole * dyHole);
+
+            if (distToHoleCenter < currentHole.radius - ball.radius / 2) { // La pelota está suficientemente dentro
+                ball.inHole = true;
+                ball.vx = 0; // Detener la pelota
+                ball.vy = 0;
+                // Centrar la pelota en el agujero visualmente
+                ball.x = currentHole.x;
+                ball.y = currentHole.y;
+
+
+                showUserMessage(`¡Nivel ${currentLevelIndex + 1} Completado!`, 2000, 'success');
+                setTimeout(() => {
+                    currentLevelIndex++;
+                    loadLevel(currentLevelIndex);
+                }, 2100); // Esperar un poco antes de cargar el siguiente nivel
             }
         }
 
         // --- Lógica de Dibujado (Draw) ---
         function draw() {
-            // Limpiar canvas
             ctx.clearRect(0, 0, canvas.width, canvas.height);
 
             // Dibujar agua
-            ctx.fillStyle = 'rgba(56, 189, 248, 0.7)'; // Azul agua semitransparente
+            ctx.fillStyle = 'rgba(56, 189, 248, 0.65)'; // Un poco más transparente
             ctx.fillRect(0, waterSurfaceY, canvas.width, canvas.height - waterSurfaceY);
+            
+            // Dibujar el agujero del nivel actual
+            if (currentLevelIndex < levels.length) {
+                const hole = levels[currentLevelIndex].hole;
+                ctx.beginPath();
+                ctx.arc(hole.x, hole.y, hole.radius, 0, Math.PI * 2);
+                ctx.fillStyle = 'rgba(20, 20, 40, 0.8)'; // Color oscuro para el agujero
+                ctx.fill();
+                // Borde sutil para el agujero
+                ctx.strokeStyle = 'rgba(0,0,0,0.5)';
+                ctx.lineWidth = 2;
+                ctx.stroke();
+                ctx.closePath();
+            }
 
-            // Dibujar pelota
-            ctx.beginPath();
-            ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
-            // Color de la pelota (ej. rojo brillante)
-            const ballGradient = ctx.createRadialGradient(ball.x - ball.radius/3, ball.y - ball.radius/3, ball.radius/5, ball.x, ball.y, ball.radius);
-            ballGradient.addColorStop(0, '#fca5a5'); // Rojo claro
-            ballGradient.addColorStop(1, '#ef4444'); // Rojo más oscuro
-            ctx.fillStyle = ballGradient;
-            ctx.fill();
-            ctx.strokeStyle = '#b91c1c'; // Borde rojo oscuro
-            ctx.lineWidth = 1;
-            ctx.stroke();
-            ctx.closePath();
+            // Dibujar pelota (solo si no está "en el agujero" lógicamente para el siguiente nivel)
+            if (!ball.inHole || (ball.inHole && currentLevelIndex < levels.length -1) || (ball.inHole && currentLevelIndex === levels.length -1 && simulationRunning) ) {
+                 // Condición para dibujar la pelota incluso si está en el hoyo en el último nivel hasta que se muestre "todos los niveles completos"
+                ctx.beginPath();
+                ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
+                const ballGradient = ctx.createRadialGradient(ball.x - ball.radius/3, ball.y - ball.radius/3, ball.radius/5, ball.x, ball.y, ball.radius);
+                ballGradient.addColorStop(0, '#f87171'); // Rojo-naranja claro
+                ballGradient.addColorStop(1, '#dc2626'); // Rojo más oscuro
+                ctx.fillStyle = ballGradient;
+                ctx.fill();
+                ctx.strokeStyle = '#991b1b'; // Borde rojo muy oscuro
+                ctx.lineWidth = 1;
+                ctx.stroke();
+                ctx.closePath();
+            }
         }
 
         // --- Bucle Principal del Juego ---
         function gameLoop(timestamp) {
             if (!simulationRunning) return;
-
-            const dt = (timestamp - lastTimestamp) / 1000; // Delta time en segundos
+            const dt = (timestamp - lastTimestamp) / 1000;
             lastTimestamp = timestamp;
-
             update(dt);
             draw();
-
             requestAnimationFrame(gameLoop);
         }
         
         // --- Ajuste responsivo del canvas ---
         function resizeCanvas() {
             const gameContainer = document.getElementById('gameContainer');
-            const containerWidth = gameContainer.clientWidth - 40; // Restar padding
-            
-            const aspectRatio = baseCanvasWidth / baseCanvasHeight;
-            let newWidth = containerWidth;
-            let newHeight = containerWidth / aspectRatio;
+            const containerStyle = getComputedStyle(gameContainer);
+            const containerPadding = parseFloat(containerStyle.paddingLeft) + parseFloat(containerStyle.paddingRight);
+            // Usar el ancho de la ventana como referencia si el contenedor es muy flexible
+            const availableWidth = Math.min(window.innerWidth * 0.9 - containerPadding, baseCanvasWidth);
 
-            if (newHeight > window.innerHeight * 0.6) { // Limitar altura máxima
-                newHeight = window.innerHeight * 0.6;
+
+            const aspectRatio = baseCanvasWidth / baseCanvasHeight;
+            let newWidth = availableWidth;
+            let newHeight = newWidth / aspectRatio;
+
+            const maxHeight = window.innerHeight * 0.7; 
+            if (newHeight > maxHeight) {
+                newHeight = maxHeight;
                 newWidth = newHeight * aspectRatio;
             }
             
             canvas.width = newWidth;
             canvas.height = newHeight;
             
-            // Re-escalar elementos si es necesario (ej. radio de la pelota, nivel del agua)
-            // Para este ejemplo, mantenemos los valores base y la simulación se adapta al tamaño.
-            // Si se quisiera un re-escalado completo, habría que ajustar BALL_RADIUS, etc.
-            // y las constantes de física en consecuencia.
-            // Por ahora, solo recalculamos el nivel del agua.
             waterSurfaceY = canvas.height * (1 - WATER_LEVEL_RATIO);
+            
+            // Si los niveles ya están definidos, es necesario actualizarlos o recargarlos
+            // Es mejor definir/actualizar niveles DESPUÉS del primer resize
+            if (levels.length > 0) { // Si ya se inicializaron los assets
+                 initializeGameAssets(); // Re-inicializar con nuevas dimensiones del canvas
+                 if(currentLevelIndex < levels.length) { // Si hay un nivel cargado
+                    const currentLevelData = levels[currentLevelIndex];
+                    // No se resetea la posición de la pelota aquí para no interrumpir el juego
+                    // pero el agujero se redibujará en su nueva posición relativa.
+                 }
+            }
 
-            // Podríamos necesitar reiniciar la posición de la pelota si el canvas cambia mucho,
-            // pero por ahora, la dejamos donde está.
-            draw(); // Redibujar con el nuevo tamaño
+
+            if(simulationRunning || currentLevelIndex > 0 || controlButton.textContent === "Jugar de Nuevo") {
+                 // Redibujar si el juego está activo, o si ya se ha jugado (para mostrar el estado del nivel)
+                 draw();
+            } else if (!isTouchDevice && controlButton.disabled) {
+                // Si no es táctil y el botón está deshabilitado (mensaje "no compatible" mostrado)
+                // No es necesario redibujar.
+            } else if (isTouchDevice && !simulationRunning && levels.length > 0) {
+                 // Si es táctil, el juego no ha comenzado pero los niveles están listos, mostrar el primer nivel.
+                 loadLevel(currentLevelIndex); // Carga y dibuja el nivel 0
+                 draw();
+            }
         }
 
         window.addEventListener('resize', resizeCanvas);
-        // Llamada inicial para establecer el tamaño
+
+        // --- Inicialización del Juego ---
         document.addEventListener('DOMContentLoaded', () => {
-            resizeCanvas();
-             // Si no hay botón de permiso (ej. Android), iniciar con gravedad por defecto
-            if (permissionButton.disabled || (typeof DeviceMotionEvent !== 'undefined' && typeof DeviceMotionEvent.requestPermission !== 'function')) {
-                 // Esto es un intento de auto-iniciar si no se requiere permiso explícito
-                 // y el botón no se usó.
-                 if (!simulationRunning) {
-                    deviceMotion.ayg = 9.8 * 30; // Gravedad por defecto si no hay interacción de permiso
-                    // simulationRunning = true; // No iniciar el loop aquí, requestDeviceMotionPermission lo hará
-                    // lastTimestamp = performance.now();
-                    // gameLoop();
-                    // permissionButton.click(); // Simular click si no se requiere permiso
-                 }
-            }
-             if (!motionListenerActive && !simulationRunning && (typeof DeviceMotionEvent === 'undefined' || typeof DeviceMotionEvent.requestPermission !== 'function')) {
-                // Si no hay API de permiso y no se ha iniciado, iniciar con gravedad
-                console.log("No permission API, starting with default gravity if simulation not running.");
-                deviceMotion.ayg = 9.8 * 30; // Gravedad por defecto * factor de escala
-                simulationRunning = true;
-                lastTimestamp = performance.now();
-                permissionButton.disabled = true;
-                permissionButton.textContent = "Simulación (gravedad estática)";
-                gameLoop();
+            isTouchDevice = ('ontouchstart' in window || navigator.maxTouchPoints > 0 || navigator.msMaxTouchPoints > 0);
+            resizeCanvas(); // Ajustar tamaño inicial
+            initializeGameAssets(); // Definir niveles después del primer resize
+            
+            if (!isTouchDevice) {
+                showUserMessage("Este juego está diseñado para pantallas táctiles.", 5000, 'error');
+                instructionsText.textContent = "Dispositivo no compatible.";
+                controlButton.disabled = true;
+                controlButton.textContent = "No Compatible";
+            } else {
+                 levelInfoText.textContent = `Nivel: ${currentLevelIndex + 1}`;
+                 loadLevel(currentLevelIndex); // Cargar y dibujar el primer nivel
+                 draw(); // Asegurar que se dibuje el estado inicial
             }
         });
-
 
     </script>
 </body>
