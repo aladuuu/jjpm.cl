@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-T">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Emulador de Agua con Giroscopio</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            background-color: #f0f4f8; /* Gris azulado claro */
+            color: #1e293b; /* Gris oscuro */
+            overflow: hidden; /* Evitar scrollbars por el canvas */
+        }
+        #gameContainer {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: #ffffff;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+        canvas {
+            background-color: #e0f2fe; /* Azul cielo muy claro para el fondo del canvas */
+            border-radius: 8px;
+            border: 2px solid #93c5fd; /* Borde azul claro */
+            display: block; /* Evita espacio extra debajo del canvas */
+        }
+        #permissionButton {
+            background-color: #3b82f6; /* Azul primario */
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            margin-bottom: 15px;
+            box-shadow: 0 4px 14px rgba(59, 130, 246, 0.3);
+        }
+        #permissionButton:hover {
+            background-color: #2563eb; /* Azul más oscuro */
+        }
+        #permissionButton:disabled {
+            background-color: #9ca3af; /* Gris para deshabilitado */
+            cursor: not-allowed;
+        }
+        .info-text {
+            font-size: 14px;
+            color: #475569; /* Gris medio */
+            margin-top: 10px;
+            text-align: center;
+        }
+         #messageBox {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #ef4444; /* Rojo para error */
+            color: white;
+            padding: 10px 20px;
+            border-radius: 6px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            z-index: 1000;
+            display: none; /* Oculto por defecto */
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div id="gameContainer">
+        <h1 class="text-2xl font-bold mb-4 text-center text-slate-700">Simulador de Agua</h1>
+        <button id="permissionButton">Iniciar Simulación</button>
+        <canvas id="waterCanvas"></canvas>
+        <p class="info-text">Inclina tu teléfono para mover la pelota.</p>
+    </div>
+    <div id="messageBox"></div>
+
+    <script>
+        // --- Elementos del DOM ---
+        const canvas = document.getElementById('waterCanvas');
+        const ctx = canvas.getContext('2d');
+        const permissionButton = document.getElementById('permissionButton');
+        const messageBox = document.getElementById('messageBox');
+
+        // --- Configuración del Canvas ---
+        // Usar un tamaño fijo menor para mejor visualización inicial y en dispositivos diversos
+        // Se ajustará para ser responsivo pero manteniendo un aspect ratio
+        const baseCanvasWidth = 300;
+        const baseCanvasHeight = 400;
+        canvas.width = baseCanvasWidth;
+        canvas.height = baseCanvasHeight;
+        
+        // --- Constantes de Física y Simulación ---
+        const BALL_RADIUS = 15; // Radio de la pelota en píxeles
+        const WATER_DENSITY_RELATIVE = 1.0; // Densidad del agua (referencia)
+        const BALL_DENSITY_RELATIVE = 0.6;  // Densidad de la pelota (0.6 = flota bien)
+
+        // Calculamos densidades "absolutas" en unidades de píxeles (arbitrarias pero consistentes)
+        // Estos valores se ajustan para que la física se sienta bien en la escala de píxeles.
+        const PIXEL_DENSITY_SCALE = 0.0001; // Factor de escala para densidades
+        const WATER_DENSITY_PIXELS = WATER_DENSITY_RELATIVE * PIXEL_DENSITY_SCALE;
+        const BALL_DENSITY_PIXELS = BALL_DENSITY_RELATIVE * PIXEL_DENSITY_SCALE;
+        
+        const BALL_VOLUME = (4/3) * Math.PI * Math.pow(BALL_RADIUS, 3);
+        const BALL_MASS = BALL_VOLUME * BALL_DENSITY_PIXELS;
+        
+        const WATER_LEVEL_RATIO = 0.6; // El agua llena el 60% inferior del contenedor
+        let waterSurfaceY = canvas.height * (1 - WATER_LEVEL_RATIO);
+
+        const DRAG_COEFFICIENT = 0.05; // Coeficiente de arrastre (resistencia del agua)
+        const TILT_SENSITIVITY = 1.0;  // Sensibilidad al movimiento del giroscopio
+        const RESTITUTION = 0.5;       // Elasticidad en las colisiones (0 a 1)
+
+        // --- Estado de la Pelota ---
+        let ball = {
+            x: canvas.width / 2,
+            y: canvas.height / 4, // Comienza arriba, caerá en el agua
+            vx: 0, // velocidad en x
+            vy: 0, // velocidad en y
+            radius: BALL_RADIUS,
+            mass: BALL_MASS
+        };
+
+        // --- Datos del Giroscopio ---
+        let deviceMotion = {
+            axg: 0, // aceleración incluyendo gravedad en x
+            ayg: 0  // aceleración incluyendo gravedad en y (principal componente gravitatorio)
+        };
+        let motionListenerActive = false;
+        let simulationRunning = false;
+        let lastTimestamp = 0;
+
+        // --- Funciones Auxiliares ---
+        function showMessage(text, duration = 3000, isError = false) {
+            messageBox.textContent = text;
+            messageBox.style.backgroundColor = isError ? '#ef4444' : '#3b82f6'; // Rojo para error, azul para info
+            messageBox.style.display = 'block';
+            setTimeout(() => {
+                messageBox.style.display = 'none';
+            }, duration);
+        }
+
+        // --- Lógica de Permisos y Eventos ---
+        permissionButton.addEventListener('click', requestDeviceMotionPermission);
+
+        function requestDeviceMotionPermission() {
+            if (typeof DeviceMotionEvent !== 'undefined' && typeof DeviceMotionEvent.requestPermission === 'function') {
+                DeviceMotionEvent.requestPermission()
+                    .then(permissionState => {
+                        if (permissionState === 'granted') {
+                            window.addEventListener('devicemotion', handleMotionEvent);
+                            motionListenerActive = true;
+                            permissionButton.disabled = true;
+                            permissionButton.textContent = "Simulación Activa";
+                            showMessage("Permiso concedido. ¡Inclina tu teléfono!", 3000);
+                            if (!simulationRunning) {
+                                simulationRunning = true;
+                                lastTimestamp = performance.now();
+                                gameLoop();
+                            }
+                        } else {
+                            showMessage('Permiso denegado. La simulación no funcionará con giroscopio.', 5000, true);
+                            // Iniciar simulación sin giroscopio (solo gravedad estática)
+                            deviceMotion.ayg = 9.8; // Gravedad estándar hacia abajo
+                            if (!simulationRunning) {
+                                simulationRunning = true;
+                                lastTimestamp = performance.now();
+                                gameLoop();
+                            }
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error solicitando permiso DeviceMotionEvent:', error);
+                        showMessage('Error al solicitar permisos. Intenta de nuevo o revisa la configuración de tu navegador.', 5000, true);
+                         // Iniciar simulación sin giroscopio
+                        deviceMotion.ayg = 9.8;
+                        if (!simulationRunning) {
+                            simulationRunning = true;
+                            lastTimestamp = performance.now();
+                            gameLoop();
+                        }
+                    });
+            } else {
+                // Para navegadores que no requieren permiso explícito o no soportan la API de permiso
+                // (ej. Android Chrome no necesita requestPermission)
+                window.addEventListener('devicemotion', handleMotionEvent);
+                motionListenerActive = true;
+                permissionButton.disabled = true;
+                permissionButton.textContent = "Simulación Activa";
+                showMessage("Intentando activar giroscopio (puede que no se requiera permiso explícito).", 3000);
+                if (!simulationRunning) {
+                    simulationRunning = true;
+                    lastTimestamp = performance.now();
+                    gameLoop();
+                }
+                 // Si no hay devicemotion, al menos que caiga por gravedad
+                if (!motionListenerActive && !simulationRunning) { // Asegurar que no se inicie dos veces
+                    deviceMotion.ayg = 9.8; // Gravedad estándar
+                    simulationRunning = true;
+                    lastTimestamp = performance.now();
+                    gameLoop();
+                }
+            }
+        }
+
+        function handleMotionEvent(event) {
+            if (event.accelerationIncludingGravity) {
+                // Multiplicamos por un factor para escalar la sensibilidad.
+                // Los valores de aceleración suelen estar en m/s^2.
+                // Los ajustamos para que se sientan bien en la escala de píxeles/frame.
+                // El factor 50 es un ejemplo, se puede ajustar.
+                const scaleFactor = 30; // Aumentado para más sensibilidad
+                deviceMotion.axg = (event.accelerationIncludingGravity.x || 0) * scaleFactor * TILT_SENSITIVITY;
+                deviceMotion.ayg = (event.accelerationIncludingGravity.y || 0) * scaleFactor * TILT_SENSITIVITY;
+
+                // Si no hay datos de giroscopio (ej. en escritorio o si el permiso falla silenciosamente)
+                // y ayg es 0, aplicamos una gravedad por defecto para que la pelota caiga.
+                if (deviceMotion.axg === 0 && deviceMotion.ayg === 0 && !motionListenerActive) {
+                     deviceMotion.ayg = 9.8 * scaleFactor; // Gravedad por defecto si no hay datos
+                } else if (motionListenerActive && deviceMotion.ayg === 0 && deviceMotion.axg === 0) {
+                    // Si el listener está activo pero los valores son 0 (ej. teléfono plano sin moverse mucho)
+                    // Aún necesitamos la componente de gravedad. El acelerómetro da 0 si no hay movimiento NETO.
+                    // accelerationIncludingGravity SÍ incluye la gravedad.
+                    // Si y es 0, puede ser que el teléfono esté perfectamente horizontal.
+                    // En ese caso, la gravedad actúa en z. Para una vista 2D, esto significa que no hay "caída" en Y.
+                    // Esto es correcto. Si el teléfono está plano, la pelota no debería caer "hacia abajo" en la pantalla.
+                    // Pero si la simulación es lateral, necesitamos un "abajo".
+                    // Para simplificar, si ayg es muy bajo (cercano a 0) y el listener está activo,
+                    // asumimos que la gravedad principal es la que el dispositivo reporta en su eje Z,
+                    // pero como no la usamos directamente, la pelota podría parecer flotar si el teléfono está plano.
+                    // Por ahora, confiamos en que ayg capture la gravedad en el eje Y del dispositivo.
+                }
+            }
+        }
+
+
+        // --- Lógica de Actualización de Física (Update) ---
+        function update(dt) {
+            if (!simulationRunning) return;
+            if (dt > 0.1) dt = 0.1; // Cap max dt para evitar saltos grandes si hay lag
+
+            // 1. Calcular volumen sumergido y masa de agua desplazada
+            let submergedDepth = Math.max(0, (ball.y + ball.radius) - waterSurfaceY);
+            submergedDepth = Math.min(submergedDepth, 2 * ball.radius); // No puede ser más que el diámetro
+            
+            let V_submerged = 0;
+            if (submergedDepth > 0) {
+                // Fórmula del volumen de un casquete esférico: V = (PI * h^2 / 3) * (3*R - h)
+                // donde h es la altura del casquete, R es el radio de la esfera.
+                V_submerged = (Math.PI * Math.pow(submergedDepth, 2) / 3) * (3 * ball.radius - submergedDepth);
+            }
+            const mass_displaced_water = V_submerged * WATER_DENSITY_PIXELS;
+
+            // 2. Calcular aceleraciones
+            // Aceleración debida al giroscopio/gravedad (ya escalada en handleMotionEvent)
+            let effective_g_y = deviceMotion.ayg;
+            let effective_g_x = deviceMotion.axg;
+
+            // Si no hay datos de giroscopio válidos, aplicar una gravedad por defecto
+            // Esto es un fallback si el listener no se activa o no da datos.
+            if (!motionListenerActive && effective_g_y === 0 && effective_g_x === 0) {
+                 effective_g_y = 9.8 * 30; // Gravedad estándar * factor de escala
+            }
+
+
+            // Aceleración neta en Y: (1 - masa_agua_desplazada / masa_pelota) * g_efectiva_y
+            // Esto combina la gravedad y la flotabilidad.
+            let acc_y = effective_g_y * (1 - mass_displaced_water / ball.mass);
+            
+            // Aceleración neta en X (solo por inclinación)
+            let acc_x = effective_g_x;
+
+            // 3. Aplicar arrastre (resistencia del fluido)
+            // Solo aplicar arrastre si está significativamente sumergido
+            if (submergedDepth > ball.radius * 0.1) { // Si al menos un 10% del radio está sumergido
+                acc_x -= (DRAG_COEFFICIENT * ball.vx) / ball.mass;
+                acc_y -= (DRAG_COEFFICIENT * ball.vy) / ball.mass;
+            }
+            
+            // 4. Actualizar velocidades
+            ball.vx += acc_x * dt;
+            ball.vy += acc_y * dt;
+
+            // 5. Actualizar posiciones
+            ball.x += ball.vx * dt;
+            ball.y += ball.vy * dt;
+
+            // 6. Colisiones con las paredes del contenedor
+            // Colisión izquierda
+            if (ball.x - ball.radius < 0) {
+                ball.x = ball.radius;
+                ball.vx *= -RESTITUTION;
+            }
+            // Colisión derecha
+            if (ball.x + ball.radius > canvas.width) {
+                ball.x = canvas.width - ball.radius;
+                ball.vx *= -RESTITUTION;
+            }
+            // Colisión arriba
+            if (ball.y - ball.radius < 0) {
+                ball.y = ball.radius;
+                ball.vy *= -RESTITUTION;
+            }
+            // Colisión abajo (fondo del contenedor)
+            if (ball.y + ball.radius > canvas.height) {
+                ball.y = canvas.height - ball.radius;
+                ball.vy *= -RESTITUTION;
+            }
+        }
+
+        // --- Lógica de Dibujado (Draw) ---
+        function draw() {
+            // Limpiar canvas
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Dibujar agua
+            ctx.fillStyle = 'rgba(56, 189, 248, 0.7)'; // Azul agua semitransparente
+            ctx.fillRect(0, waterSurfaceY, canvas.width, canvas.height - waterSurfaceY);
+
+            // Dibujar pelota
+            ctx.beginPath();
+            ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
+            // Color de la pelota (ej. rojo brillante)
+            const ballGradient = ctx.createRadialGradient(ball.x - ball.radius/3, ball.y - ball.radius/3, ball.radius/5, ball.x, ball.y, ball.radius);
+            ballGradient.addColorStop(0, '#fca5a5'); // Rojo claro
+            ballGradient.addColorStop(1, '#ef4444'); // Rojo más oscuro
+            ctx.fillStyle = ballGradient;
+            ctx.fill();
+            ctx.strokeStyle = '#b91c1c'; // Borde rojo oscuro
+            ctx.lineWidth = 1;
+            ctx.stroke();
+            ctx.closePath();
+        }
+
+        // --- Bucle Principal del Juego ---
+        function gameLoop(timestamp) {
+            if (!simulationRunning) return;
+
+            const dt = (timestamp - lastTimestamp) / 1000; // Delta time en segundos
+            lastTimestamp = timestamp;
+
+            update(dt);
+            draw();
+
+            requestAnimationFrame(gameLoop);
+        }
+        
+        // --- Ajuste responsivo del canvas ---
+        function resizeCanvas() {
+            const gameContainer = document.getElementById('gameContainer');
+            const containerWidth = gameContainer.clientWidth - 40; // Restar padding
+            
+            const aspectRatio = baseCanvasWidth / baseCanvasHeight;
+            let newWidth = containerWidth;
+            let newHeight = containerWidth / aspectRatio;
+
+            if (newHeight > window.innerHeight * 0.6) { // Limitar altura máxima
+                newHeight = window.innerHeight * 0.6;
+                newWidth = newHeight * aspectRatio;
+            }
+            
+            canvas.width = newWidth;
+            canvas.height = newHeight;
+            
+            // Re-escalar elementos si es necesario (ej. radio de la pelota, nivel del agua)
+            // Para este ejemplo, mantenemos los valores base y la simulación se adapta al tamaño.
+            // Si se quisiera un re-escalado completo, habría que ajustar BALL_RADIUS, etc.
+            // y las constantes de física en consecuencia.
+            // Por ahora, solo recalculamos el nivel del agua.
+            waterSurfaceY = canvas.height * (1 - WATER_LEVEL_RATIO);
+
+            // Podríamos necesitar reiniciar la posición de la pelota si el canvas cambia mucho,
+            // pero por ahora, la dejamos donde está.
+            draw(); // Redibujar con el nuevo tamaño
+        }
+
+        window.addEventListener('resize', resizeCanvas);
+        // Llamada inicial para establecer el tamaño
+        document.addEventListener('DOMContentLoaded', () => {
+            resizeCanvas();
+             // Si no hay botón de permiso (ej. Android), iniciar con gravedad por defecto
+            if (permissionButton.disabled || (typeof DeviceMotionEvent !== 'undefined' && typeof DeviceMotionEvent.requestPermission !== 'function')) {
+                 // Esto es un intento de auto-iniciar si no se requiere permiso explícito
+                 // y el botón no se usó.
+                 if (!simulationRunning) {
+                    deviceMotion.ayg = 9.8 * 30; // Gravedad por defecto si no hay interacción de permiso
+                    // simulationRunning = true; // No iniciar el loop aquí, requestDeviceMotionPermission lo hará
+                    // lastTimestamp = performance.now();
+                    // gameLoop();
+                    // permissionButton.click(); // Simular click si no se requiere permiso
+                 }
+            }
+             if (!motionListenerActive && !simulationRunning && (typeof DeviceMotionEvent === 'undefined' || typeof DeviceMotionEvent.requestPermission !== 'function')) {
+                // Si no hay API de permiso y no se ha iniciado, iniciar con gravedad
+                console.log("No permission API, starting with default gravity if simulation not running.");
+                deviceMotion.ayg = 9.8 * 30; // Gravedad por defecto * factor de escala
+                simulationRunning = true;
+                lastTimestamp = performance.now();
+                permissionButton.disabled = true;
+                permissionButton.textContent = "Simulación (gravedad estática)";
+                gameLoop();
+            }
+        });
+
+
+    </script>
+</body>
+</html>
