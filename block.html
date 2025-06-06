@@ -18,34 +18,39 @@
             --danger-color: #ff5f56;
         }
 
-        html, body {
-            height: 100%;
-            margin: 0;
-            padding: 0;
+        html {
             background-color: #0d0d0d;
-            font-family: 'Fira Code', 'Courier New', monospace;
-            overflow: hidden; /* Evita barras de scroll */
-            touch-action: none; /* Deshabilita zoom y scroll por gestos */
         }
 
         body {
+            /* --- CORRECCIÓN CLAVE --- */
+            /* Usamos 100dvh para usar la altura visible REAL de la pantalla del móvil */
+            height: 100dvh; 
+            margin: 0;
+            padding: 10px; /* Añadimos el padding aquí para centrar el contenedor */
+            box-sizing: border-box;
+            
+            /* Usamos flexbox para centrar perfectamente la ventana */
             display: flex;
             justify-content: center;
             align-items: center;
-            padding: 10px;
-            box-sizing: border-box;
+
+            font-family: 'Fira Code', 'Courier New', monospace;
+            overflow: hidden; 
+            touch-action: none;
         }
 
         /* Contenedor principal que simula la ventana de la terminal */
         .terminal-window {
             width: 100%;
-            max-width: 500px; /* Ideal para vista vertical */
-            height: 98%;
-            max-height: 900px;
+            height: 100%;
+            max-width: 500px;
+            
             background-color: var(--terminal-bg);
             border: 1px solid var(--terminal-border);
             border-radius: 8px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            
             display: flex;
             flex-direction: column;
             overflow: hidden;
@@ -88,7 +93,8 @@
             flex-direction: column;
             padding: 10px;
             gap: 10px;
-            position: relative; /* Para posicionar el canvas */
+            position: relative; 
+            min-height: 0; /* Mantenemos esto, es crucial para flexbox */
         }
         
         .stats-bar {
@@ -116,7 +122,7 @@
             width: 100%;
             height: 100%;
             border-radius: 4px;
-            image-rendering: pixelated; /* Mantiene los bordes nítidos */
+            image-rendering: pixelated; 
         }
 
     </style>
@@ -136,7 +142,7 @@
     <div class="game-container">
         <div class="stats-bar">
             <div>SCORE: <span id="score">0</span></div>
-            <div class="lives">LIVES: <span id="lives">3</span></div>
+            <div class="lives">LIVES: <span id="lives">❤</span></div>
         </div>
         <canvas id="gameCanvas"></canvas>
     </div>
@@ -150,7 +156,7 @@
     const livesElem = document.getElementById('lives');
 
     // --- GAME STATE & CONSTANTS ---
-    let gameState = 'start'; // 'start', 'play', 'gameOver', 'levelComplete'
+    let gameState = 'start'; // 'start', 'play', 'gameOver', 'levelComplete', 'start_life'
     let score = 0;
     let lives = 3;
     let bricks = [];
@@ -160,7 +166,7 @@
     const brickInfo = {
         rows: 5,
         cols: 7,
-        width: 0, // se calculará dinámicamente
+        width: 0, 
         height: 20,
         padding: 4,
         offsetTop: 40,
@@ -175,7 +181,6 @@
     function initAudio() {
         if (Tone.context.state !== 'running') {
             Tone.start();
-            console.log("Audio context started.");
         }
     }
     
@@ -195,7 +200,7 @@
         // Recalcular propiedades dinámicas
         brickInfo.width = (canvas.width - (brickInfo.offsetLeft * 2) - (brickInfo.padding * (brickInfo.cols - 1))) / brickInfo.cols;
         
-        if (paddle) { // Si ya existe, ajustarlo
+        if (paddle) { 
             paddle.width = canvas.width / 5;
             paddle.y = canvas.height - 30;
         }
@@ -207,16 +212,14 @@
             height: 15,
             x: (canvas.width / 2) - (canvas.width / 10),
             y: canvas.height - 30,
-            speed: 8,
-            dx: 0
         };
 
         ball = {
             radius: 8,
             x: canvas.width / 2,
-            y: paddle.y - 10,
+            y: paddle.y - 15,
             speed: 4,
-            dx: 3,
+            dx: 3 * (Math.random() > 0.5 ? 1 : -1), // Random initial direction
             dy: -3
         };
     }
@@ -243,7 +246,7 @@
     // --- UI & DRAWING ---
     function updateUI() {
         scoreElem.textContent = score;
-        livesElem.textContent = '❤'.repeat(lives);
+        livesElem.textContent = '❤'.repeat(lives) || '---';
     }
     
     function drawRect(x, y, w, h, color) {
@@ -273,6 +276,7 @@
         ctx.fillStyle = color;
         ctx.font = `bold ${size} 'Fira Code', monospace`;
         ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
         ctx.fillText(text, x, y);
         if (subtext) {
              ctx.font = `bold ${parseInt(size)/2}px 'Fira Code', monospace`;
@@ -282,82 +286,65 @@
 
     // --- GAME LOGIC ---
     function movePaddle() {
-        paddle.x += paddle.dx;
-        // Wall collision
-        if (paddle.x < 0) {
-            paddle.x = 0;
-        }
-        if (paddle.x + paddle.width > canvas.width) {
-            paddle.x = canvas.width - paddle.width;
-        }
+        if (paddle.x < 5) paddle.x = 5;
+        if (paddle.x + paddle.width > canvas.width - 5) paddle.x = canvas.width - paddle.width - 5;
     }
     
     function moveBall() {
         ball.x += ball.dx;
         ball.y += ball.dy;
 
-        // Wall collision (left/right)
         if (ball.x + ball.radius > canvas.width || ball.x - ball.radius < 0) {
             ball.dx *= -1;
             hitSound.triggerAttackRelease("A2", "8n");
         }
-
-        // Wall collision (top)
         if (ball.y - ball.radius < 0) {
             ball.dy *= -1;
             hitSound.triggerAttackRelease("A2", "8n");
         }
-        
-        // Paddle collision
         if (ball.y + ball.radius > paddle.y && 
-            ball.x > paddle.x && 
-            ball.x < paddle.x + paddle.width) {
+            ball.y - ball.radius < paddle.y + paddle.height &&
+            ball.x + ball.radius > paddle.x && 
+            ball.x - ball.radius < paddle.x + paddle.width) {
             
-            // Invertir dirección Y
-            ball.dy = -ball.speed;
-            
-            // Influir en la dirección X basado en dónde golpea la paleta
-            let deltaX = ball.x - (paddle.x + paddle.width / 2);
-            ball.dx = deltaX * 0.25;
-
-            hitSound.triggerAttackRelease("C4", "8n");
+            if (ball.dy > 0) {
+                ball.dy = -ball.speed;
+                let deltaX = ball.x - (paddle.x + paddle.width / 2);
+                ball.dx = deltaX * 0.25;
+                hitSound.triggerAttackRelease("C4", "8n");
+            }
         }
-        
-        // Bottom wall (lose life)
         if (ball.y + ball.radius > canvas.height) {
             lives--;
             loseLifeSound.triggerAttackRelease("G2", "2n");
+            updateUI();
             if (lives <= 0) {
                 gameState = 'gameOver';
             } else {
+                gameState = 'start_life';
                 resetPlayer();
             }
-            updateUI();
         }
     }
 
     function brickCollision() {
-        let allBricksBroken = true;
-        bricks.forEach(column => {
-            column.forEach(brick => {
-                if (brick.status === 1) {
-                    allBricksBroken = false;
-                    if (
-                        ball.x > brick.x &&
-                        ball.x < brick.x + brickInfo.width &&
-                        ball.y > brick.y &&
-                        ball.y < brick.y + brickInfo.height
-                    ) {
+        let remainingBricks = 0;
+        for (let c = 0; c < brickInfo.cols; c++) {
+            for (let r = 0; r < brickInfo.rows; r++) {
+                const b = bricks[c][r];
+                if (b.status === 1) {
+                    remainingBricks++;
+                    if (ball.x > b.x && ball.x < b.x + brickInfo.width && ball.y > b.y && ball.y < b.y + brickInfo.height) {
                         ball.dy *= -1;
-                        brick.status = 0;
+                        b.status = 0;
                         score += 10;
                         breakSound.triggerAttackRelease("C3", "8n");
                         updateUI();
                     }
                 }
-            });
-        });
-        if (allBricksBroken) {
+            }
+        }
+        if (remainingBricks === 0 && gameState === 'play') {
             gameState = 'levelComplete';
         }
     }
@@ -365,7 +352,6 @@
     // --- GAME LOOP ---
     function update() {
         if (gameState !== 'play') return;
-        
         movePaddle();
         moveBall();
         brickCollision();
@@ -373,18 +359,16 @@
 
     function render() {
         const fgColor = getComputedStyle(document.documentElement).getPropertyValue('--terminal-fg');
-        const bgColor = getComputedStyle(document.documentElement).getPropertyValue('--terminal-bg');
         const dangerColor = getComputedStyle(document.documentElement).getPropertyValue('--danger-color');
-
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         
         drawBricks();
         drawRect(paddle.x, paddle.y, paddle.width, paddle.height, fgColor);
         drawCircle(ball.x, ball.y, ball.radius, fgColor);
         
-        // Game state messages
-        if (gameState === 'start') {
-            drawText("BREAKOUT.EXE", canvas.width / 2, canvas.height / 2, fgColor, '2.5em', 'Toca para empezar');
+        if (gameState === 'start' || gameState === 'start_life') {
+            const mainMessage = gameState === 'start' ? 'BREAKOUT.EXE' : `VIDAS: ${'❤'.repeat(lives)}`;
+            drawText(mainMessage, canvas.width / 2, canvas.height / 2, fgColor, '2.5em', 'Toca para empezar');
         } else if (gameState === 'gameOver') {
             drawText("GAME OVER", canvas.width / 2, canvas.height / 2, dangerColor, '3em', `Puntuación final: ${score}`);
         } else if (gameState === 'levelComplete') {
@@ -400,35 +384,31 @@
 
     // --- EVENT LISTENERS ---
     function handleMove(e) {
-        // Obtenemos la posición relativa al canvas
+        if (gameState !== 'play') return;
         const rect = canvas.getBoundingClientRect();
         const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-        const relativeX = clientX - rect.left;
-
-        if (relativeX > 0 && relativeX < canvas.width) {
-            paddle.x = relativeX - paddle.width / 2;
-        }
+        paddle.x = clientX - rect.left - paddle.width / 2;
     }
     
     function handleStart(e) {
-        initAudio(); // Iniciar audio en la primera interacción
-        if(gameState === 'start') {
+        e.preventDefault();
+        initAudio();
+        if(gameState === 'start' || gameState === 'start_life') {
             gameState = 'play';
         } else if (gameState === 'gameOver' || gameState === 'levelComplete') {
             restartGame();
-        } else {
-             handleMove(e);
         }
     }
     
-    canvas.addEventListener('touchstart', handleStart);
-    canvas.addEventListener('touchmove', handleMove);
-    canvas.addEventListener('mousedown', handleStart);
-    canvas.addEventListener('mousemove', handleMove);
+    document.body.addEventListener('touchstart', handleStart, { passive: false });
+    document.body.addEventListener('touchmove', handleMove, { passive: false });
+    document.body.addEventListener('mousedown', handleStart);
+    document.body.addEventListener('mousemove', (e) => {
+        if (e.buttons === 1) handleMove(e);
+    });
     
     window.addEventListener('resize', () => {
         resizeCanvas();
-        createBricks(); // Recalcular ladrillos con el nuevo tamaño
         render();
     });
 
