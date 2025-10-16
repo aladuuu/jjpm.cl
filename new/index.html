@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CRT Terminal</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #0a0a0a url('fondo.png') center/cover no-repeat fixed;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            font-family: 'Courier New', monospace;
+            overflow: hidden;
+        }
+        
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.3);
+            z-index: 0;
+        }
+        
+        .monitor-container {
+            z-index: 1;
+        }
+
+        .monitor-container {
+            position: relative;
+            width: 90vw;
+            max-width: 610px;
+            aspect-ratio: 1024/1024;
+        }
+
+        .monitor-frame {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background-image: url('frame.png');
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        .screen-container {
+            position: absolute;
+            top: 12.5%;
+            left: 11%;
+            width: 78%;
+            height: 63%;
+            background: #000;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: inset 0 0 100px rgba(0, 255, 100, 0.1);
+        }
+
+        .screen {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            background: #000;
+            color: #0f0;
+            padding: 20px;
+            overflow-y: auto;
+            font-size: clamp(12px, 1.5vw, 16px);
+            line-height: 1.5;
+        }
+
+        /* CRT Effects */
+        .screen::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: repeating-linear-gradient(
+                0deg,
+                rgba(0, 0, 0, 0.15),
+                rgba(0, 0, 0, 0.15) 1px,
+                transparent 1px,
+                transparent 2px
+            );
+            pointer-events: none;
+            z-index: 2;
+        }
+
+        .screen::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(ellipse at center, transparent 0%, rgba(0, 0, 0, 0.4) 100%);
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        /* Phosphor glow */
+        .screen {
+            text-shadow: 0 0 5px #0f0, 0 0 10px #0f0;
+            animation: flicker 0.15s infinite alternate;
+        }
+
+        @keyframes flicker {
+            0% { opacity: 0.97; }
+            100% { opacity: 1; }
+        }
+
+        /* Screen curvature */
+        .screen-container {
+            border-radius: 3%;
+            transform: perspective(1000px) rotateY(0deg);
+        }
+
+        /* Ambient glow */
+        .screen-container::before {
+            content: '';
+            position: absolute;
+            top: -20px;
+            left: -20px;
+            right: -20px;
+            bottom: -20px;
+            background: radial-gradient(circle, rgba(0, 255, 100, 0.2) 0%, transparent 70%);
+            z-index: -1;
+            filter: blur(20px);
+        }
+
+        .terminal-content {
+            position: relative;
+            z-index: 3;
+        }
+
+        .prompt {
+            display: flex;
+            align-items: center;
+            margin-top: 10px;
+        }
+
+        .prompt-text {
+            color: #0f0;
+            margin-right: 5px;
+        }
+
+        input {
+            background: transparent;
+            border: none;
+            outline: none;
+            color: #0f0;
+            font-family: 'Courier New', monospace;
+            font-size: inherit;
+            flex: 1;
+            caret-color: #0f0;
+        }
+
+        .cursor {
+            display: inline-block;
+            width: 8px;
+            height: 1.2em;
+            background: #0f0;
+            animation: blink 1s infinite;
+            vertical-align: text-bottom;
+        }
+
+        @keyframes blink {
+            0%, 49% { opacity: 1; }
+            50%, 100% { opacity: 0; }
+        }
+
+        .output {
+            margin: 5px 0;
+            white-space: pre-wrap;
+        }
+
+        .ascii-art {
+            color: #0f0;
+            line-height: 1.2;
+            font-size: 0.8em;
+        }
+
+        .help-text {
+            color: #0f0;
+            margin: 5px 0;
+        }
+
+        .error {
+            color: #ff4444;
+            text-shadow: 0 0 5px #ff4444;
+        }
+
+        /* Power LED */
+        .power-led {
+            position: absolute;
+            bottom: 10%;
+            left: 68.8%;
+            width: 2%;
+            height: 2%;
+            background: #0f0;
+            border-radius: 50%;
+            box-shadow: 0 0 10px #0f0, 0 0 20px #0f0;
+            animation: pulse 2s infinite;
+            z-index: 11;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #000;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #0f0;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <div class="monitor-container">
+        <div class="monitor-frame"></div>
+        <div class="power-led"></div>
+        <div class="screen-container">
+            <div class="screen" id="screen">
+                <div class="terminal-content" id="content">
+                    <div class="output">Welcome to JJPM Terminal v2.0</div>
+                    <div class="output">Type 'help' for available commands</div>
+                    <div class="output">────────────────────────────────────────</div>
+                </div>
+                <div class="prompt">
+                    <span class="prompt-text">jp@www ~ %</span>
+                    <input type="text" id="input" autocomplete="off" autofocus>
+                    <span class="cursor"></span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const input = document.getElementById('input');
+        const content = document.getElementById('content');
+        const screen = document.getElementById('screen');
+
+        const commands = {
+            help: () => `Available commands:
+  help     - Show this help message
+  about    - About me
+  projects - My projects
+  contact  - Contact information
+  clear    - Clear terminal
+  skills   - Technical skills
+  social   - Social media links`,
+            
+            about: () => `About Me:
+────────────────────────────────────────
+I'm a developer passionate about creating
+unique web experiences. This terminal is
+a tribute to the golden age of computing.`,
+            
+            projects: () => `Projects:
+────────────────────────────────────────
+> Terminal Portfolio (This site!)
+> [Add your projects here]
+> [Add your projects here]`,
+            
+            contact: () => `Contact Information:
+────────────────────────────────────────
+Email: your@email.com
+GitHub: github.com/yourusername`,
+            
+            skills: () => `Technical Skills:
+────────────────────────────────────────
+Frontend: HTML, CSS, JavaScript, React
+Backend: Node.js, Python
+Tools: Git, Docker, Linux`,
+            
+            social: () => `Social Links:
+────────────────────────────────────────
+GitHub: github.com/yourusername
+LinkedIn: linkedin.com/in/yourprofile
+Twitter: @yourhandle`,
+            
+            clear: () => {
+                content.innerHTML = '';
+                return '';
+            }
+        };
+
+        input.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                const cmd = input.value.trim().toLowerCase();
+                
+                // Display command
+                const cmdLine = document.createElement('div');
+                cmdLine.className = 'output';
+                cmdLine.textContent = `jp@www ~ % ${input.value}`;
+                content.appendChild(cmdLine);
+                
+                // Execute command
+                if (cmd === '') {
+                    // Do nothing for empty input
+                } else if (commands[cmd]) {
+                    const result = commands[cmd]();
+                    if (result) {
+                        const output = document.createElement('div');
+                        output.className = 'output';
+                        output.textContent = result;
+                        content.appendChild(output);
+                    }
+                } else {
+                    const error = document.createElement('div');
+                    error.className = 'output error';
+                    error.textContent = `Command not found: ${cmd}`;
+                    content.appendChild(error);
+                }
+                
+                input.value = '';
+                screen.scrollTop = screen.scrollHeight;
+            }
+        });
+
+        // Keep input focused
+        screen.addEventListener('click', () => input.focus());
+        input.focus();
+    </script>
+</body>
+</html>
